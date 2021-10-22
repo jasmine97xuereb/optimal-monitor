@@ -1,0 +1,31 @@
+Name:  The Best a Monitor can do
+Version:  0.1
+Synopsis:  An implementation of the work in The Best a Monitor can do.
+Authors:  Jasmine Xuereb
+License:  PROP
+OASISFormat:  0.4
+Plugins:  META (0.4), DevFiles (0.4)
+BuildTools:  ocamlbuild, make
+AlphaFeatures:  ocamlbuild_more_args
+XOCamlBuildExtraArgs:  -use-menhir -yaccflag --infer 
+
+Library "utils"
+    Path: src/utils
+    Modules: Ast, PrettyPrint, EnvFunctions
+
+Library "parsing"
+    Path: src/parsing
+    Modules: Lexer, Parser
+    BuildDepends: utils
+
+Library "definitions"
+    Path: src/definitions
+    Modules: StrongestMonCons, SMCTableauRules
+    BuildDepends: utils
+
+Executable "main"
+    Path: src
+    MainIs: main.ml
+    CompiledObject: best
+    BuildDepends: str, utils, parsing, definitions
+    CCLib: -std=c++17
