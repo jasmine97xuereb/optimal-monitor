@@ -1,50 +1,49 @@
 (* Print the recHML formula *)
 
+let rec formula_to_string (input: Ast.Formula.t): string = 
+  match input with
+  | Ast.Formula.Verdict(x) -> print_verdict x 
+  | Ast.Formula.LVar(x) -> print_lvar x 
+  | Ast.Formula.Disjunction(x) -> print_disjunction x
+  | Ast.Formula.Conjunction(x) -> print_conjunction x
+  | Ast.Formula.Existential(x) -> print_existential x
+  | Ast.Formula.Universal(x) -> print_universal x 
+  | Ast.Formula.Min(x) -> print_min x 
+  | Ast.Formula.Max(x) -> print_max x 
+
+and print_action (act: Ast.Act.t): string = 
+  act.name
+
+and print_verdict (v: Ast.Formula.Verdict.t): string  = 
+  match v.verdict with
+  | true -> "tt"
+  | false -> "ff"
+
+and print_lvar (x: Ast.Formula.LVar.t): string  = 
+  x.lvar    
+
+and print_disjunction (f: Ast.Formula.Disjunction.t): string = 
+  (formula_to_string f.left) ^ " | " ^ (formula_to_string f.right)
+
+and print_conjunction (f: Ast.Formula.Conjunction.t): string = 
+  (formula_to_string f.left) ^ " & " ^ (formula_to_string f.right)
+
+and print_existential (f: Ast.Formula.Existential.t): string = 
+  "<" ^ (print_action f.act) ^ ">." ^ (formula_to_string f.cont)
+
+and print_universal (f: Ast.Formula.Universal.t): string = 
+  "[" ^ (print_action f.act) ^ "]." ^ (formula_to_string f.cont)
+
+and print_min (f: Ast.Formula.Min.t): string = 
+  "min " ^ (print_lvar f.lvar) ^ "." ^ (formula_to_string f.cont)
+
+and print_max (f: Ast.Formula.Max.t): string = 
+  "max " ^ (print_lvar f.lvar) ^ "." ^ (formula_to_string f.cont)
+  
 let rec pretty_print_formula (formula: Ast.Formula.t): unit = 
-  let rec formula_to_string (input: Ast.Formula.t): string = 
-      match input with
-      | Ast.Formula.Verdict(x) -> print_verdict x 
-      | Ast.Formula.LVar(x) -> print_lvar x 
-      | Ast.Formula.Disjunction(x) -> print_disjunction x
-      | Ast.Formula.Conjunction(x) -> print_conjunction x
-      | Ast.Formula.Existential(x) -> print_existential x
-      | Ast.Formula.Universal(x) -> print_universal x 
-      | Ast.Formula.Min(x) -> print_min x 
-      | Ast.Formula.Max(x) -> print_max x 
-
-    and print_action (act: Ast.Act.t): string = 
-      act.name
-
-    and print_verdict (v: Ast.Formula.Verdict.t): string  = 
-      match v.verdict with
-      | true -> "tt"
-      | false -> "ff"
-
-    and print_lvar (x: Ast.Formula.LVar.t): string  = 
-      x.lvar    
-
-    and print_disjunction (f: Ast.Formula.Disjunction.t): string = 
-      (formula_to_string f.left) ^ " | " ^ (formula_to_string f.right)
-
-    and print_conjunction (f: Ast.Formula.Conjunction.t): string = 
-      (formula_to_string f.left) ^ " & " ^ (formula_to_string f.right)
-
-    and print_existential (f: Ast.Formula.Existential.t): string = 
-      "<" ^ (print_action f.act) ^ ">." ^ (formula_to_string f.cont)
-
-    and print_universal (f: Ast.Formula.Universal.t): string = 
-      "[" ^ (print_action f.act) ^ "]." ^ (formula_to_string f.cont)
-
-    and print_min (f: Ast.Formula.Min.t): string = 
-      "min " ^ (print_lvar f.lvar) ^ "." ^ (formula_to_string f.cont)
-
-    and print_max (f: Ast.Formula.Max.t): string = 
-      "max " ^ (print_lvar f.lvar) ^ "." ^ (formula_to_string f.cont)
-
-  in print_endline(formula_to_string formula)
+  print_string((formula_to_string formula) ^ "; ")
 
   
-
 let rec tabulate tab = match tab with
   | 0 -> ""
   | _ -> "  " ^ tabulate (tab - 1)
@@ -111,5 +110,6 @@ let rec pretty_print_ast (input: Ast.Formula.t) (tab) =
     pretty_print_ast tree.cont (tab + 1) ^ "\n" ^
     tabulate tab ^ "</Max>\n"
 
+    
 
   

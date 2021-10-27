@@ -36,15 +36,18 @@ let get_strongest_mon_cons (f: Ast.Formula.t): Ast.Formula.t =
   let step1 = elim_em f in 
     print_string("After eliminating existential modalities, we get ");
     pretty_print_formula step1; 
+    print_endline("\n");
     
     let step1_smp = apply_laws step1 in
       print_string("After simplifying, we get ");
       pretty_print_formula step1_smp;
+      print_endline("\n");
 
       let step2 = elim_min step1_smp in
         print_string("After eliminating minimal fixed points, we get ");
         pretty_print_formula step2;
+        print_endline("\n");
+        print_endline("The Tableau for Eliminating the Disjunctions is: \n");
+        print_endline (print_tab_tree (create_tableau [step2]) "");
         step2
-
-
 

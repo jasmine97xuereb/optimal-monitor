@@ -17,4 +17,5 @@ let main =
     
     print_endline(pretty_print_ast formula 0);
     pretty_print_formula formula;
+    print_endline("\n");
     get_strongest_mon_cons formula
