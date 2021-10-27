@@ -1,7 +1,7 @@
-(* The procedure for obtaining the strongest monitorable consequence is three fold:       *)
-(* 1. Eliminate the existential modalities by replacing all occurrences of <a>φ by tt      *)
-(* 2. Eliminate the least fixed points by replacing all occurrences of min X.φ by max X.φ  *)
-(* 3. Remove all disjunctions                                                              *)
+(* The procedure for obtaining the strongest monitorable consequence is three fold:         *)
+(* 1. Eliminate the existential modalities by replacing all occurrences of <a>φ by tt       *)
+(* 2. Eliminate the least fixed points by replacing all occurrences of min X.φ by max X.φ   *)
+(* 3. Remove all disjunctions using the tableau rules                                       *)
 
 open PrettyPrint
 open EnvFunctions
@@ -9,7 +9,7 @@ open SMCTableauRules
 
 (* Function that takes a formula and eliminates the existential modalities *)
 let rec elim_em (f: Ast.Formula.t): Ast.Formula.t = 
-  match f with 
+  match f with  
   | Ast.Formula.Verdict(x) -> f 
   | Ast.Formula.LVar(x) -> f 
   | Ast.Formula.Disjunction(x) -> create_disjunction (elim_em x.left) (elim_em x.right)
