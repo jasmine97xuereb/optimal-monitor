@@ -49,7 +49,7 @@ let get_strongest_mon_cons (f: Ast.Formula.t): Ast.Formula.t =
         pretty_print_formula step2;
         print_endline("\n");
         
-        let tableau = create_tableau (FormulaSet.singleton step2) Nodes.empty in
+        let tableau = formula_to_tableau (FormulaSet.singleton step2) in
           print_endline("The Tableau for Eliminating the Disjunctions is: \n");
           print_endline (print_tab_tree tableau "");
                 

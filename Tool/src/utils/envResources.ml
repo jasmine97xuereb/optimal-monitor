@@ -16,6 +16,7 @@ type rule = Disjunction | Conjunction | Max | BoxA of Act.t | BoxAB | X | TT | F
 (*  (iii) a list of children where children are tree                        *)
 (*  (iv) the rule applied to derive the children                            *)
 (*  (v) a boolean value indicating whether it is the target of a back-edge  *)
+
 module TabTree = 
   struct
     type 'a tree = 
@@ -56,9 +57,8 @@ module LVars = Map.Make(struct type t = Ast.Formula.LVar.t let compare = compare
 (* Set of Formulas *)
 module FormulaSet = Set.Make(struct type t = Ast.Formula.t let compare = compare end)
 
-(* Set of formula sets *)
-(* This is used to store the nodes that have already been added when creating a tableau *)
-(* module Nodes = Set.Make(struct type t = FormulaSet.t let compare = compare end) *)
-module Nodes = Set.Make(struct type t = FormulaSet.t * int let compare = compare end)
-
 let nodeCounter = ref 0
+
+(* List of tuples where the first element is the node value and the second element is the node id. *)
+type visitedNodes = (FormulaSet.t * int) list
+
