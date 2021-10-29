@@ -143,32 +143,27 @@ and formula_is_lvar (f: Ast.Formula.t): bool =
 
 
 
-
-(* CONTINUE WORKING HERE *)
-(* TabTree.create_node x.node_value (List.map (fun x -> relabel_tableau x) x.children) x.rule  *)
-
-(* let rec relabel_tableau (t: FormulaSet.t TabTree.tree): FormulaSet.t TabTree.tree = 
+let rec relabel_tableau (t: FormulaSet.t TabTree.tree): FormulaSet.t TabTree.tree = 
   match t with 
-  | TabTree.Node(x) -> (
-    match x.rule with 
-    | Disjunction -> 
-      let children = List.map (fun y -> relabel_tableau y) x.children
-      in let new_node_value = List.hd children (* because we know for sure that this only has one child i.e. children is one list *)
-      in TabTree.create_node x.id new_node_value children x.rule x.back_edge
-    (* | Conjunction -> relabel_conjunction  *)
-    (* | Max -> 
-      if x.back_edge 
-      then create_max X (x.children)  *)
-    (* | BoxA ->  *)
-    | BoxAB -> t 
-    (* | X ->   *)
-    | TT -> t
-    | FF -> t
-    | _ -> t 
-  ) 
+  | TabTree.Node(x) ->      
+      if x.back_edge  
+      then 
+        let new_children = List.map (fun y -> relabel_tableau y) x.children in  
+        let cont = (
+          match List.hd new_children with
+          | TabTree.Leaf(y) -> FormulaSet.choose y.leaf_value
+          | TabTree.Node(y) -> FormulaSet.choose y.node_value
+        ) in
+        let max_formula = create_max {Ast.Formula.LVar.lvar = ("X" ^ (string_of_int x.id))} cont
+        in TabTree.create_node x.id (FormulaSet.singleton max_formula) new_children x.rule x.back_edge
+      else (
+        match x.rule with 
+        | BoxAB | Disjunction | Max | X | TT | FF -> inherit_children x
+        | Conjunction -> conjunct_children x
+        | BoxA(a) -> universal_children x a
+        | _ -> t
+      )
 
-  (* TabTree.create_node x.node_value (List.map (fun x -> relabel_tableau x) x.children) x.rule   *)
-  
   | TabTree.Leaf(x) -> 
     let relabel_leaf = 
       if x.back_edge_target >= 0 
@@ -176,8 +171,35 @@ and formula_is_lvar (f: Ast.Formula.t): bool =
       else if FormulaSet.exists (fun x -> formula_is_tt x) x.leaf_value
       then create_verdict true
       else create_verdict false
-    in TabTree.create_leaf (FormulaSet.singleton relabel_leaf) x.back_edge_target *)
+    in TabTree.create_leaf (FormulaSet.singleton relabel_leaf) x.back_edge_target
 
+
+and inherit_children (n: FormulaSet.t TabTree.node) = 
+  let new_children = List.map (fun y -> relabel_tableau y) n.children in 
+    let new_node_value =  
+      match List.hd new_children with  (* because we know for sure that this only has one child i.e. children is one list *)
+      | TabTree.Leaf(x) -> x.leaf_value 
+      | TabTree.Node(x) -> x.node_value
+    in TabTree.create_node n.id new_node_value new_children n.rule n.back_edge
+
+and conjunct_children (n: FormulaSet.t TabTree.node) = 
+  let new_children = List.map (fun y -> relabel_tableau y) n.children in 
+    let new_node_value =  
+      (* we know for sure that this node has two children *)
+      match ((List.nth new_children 0), (List.nth new_children 1)) with 
+      | (TabTree.Leaf(x), TabTree.Leaf(y)) -> create_conjunction (FormulaSet.choose x.leaf_value) (FormulaSet.choose y.leaf_value) 
+      | (TabTree.Leaf(x), TabTree.Node(y)) -> create_conjunction (FormulaSet.choose x.leaf_value) (FormulaSet.choose y.node_value)
+      | (TabTree.Node(x), TabTree.Leaf(y)) -> create_conjunction (FormulaSet.choose x.node_value) (FormulaSet.choose y.leaf_value)
+      | (TabTree.Node(x), TabTree.Node(y)) -> create_conjunction (FormulaSet.choose x.node_value) (FormulaSet.choose y.node_value)
+    in TabTree.create_node n.id (FormulaSet.singleton new_node_value) new_children n.rule n.back_edge
+    
+and universal_children (n: FormulaSet.t TabTree.node) (a: Ast.Act.t) = 
+let new_children = List.map (fun y -> relabel_tableau y) n.children in 
+  let new_node_value =  
+    match List.hd new_children with  (* because we know for sure that this only has one child i.e. children is one list *)
+    | TabTree.Leaf(x) -> create_universal a (FormulaSet.choose x.leaf_value) 
+    | TabTree.Node(x) -> create_universal a (FormulaSet.choose x.node_value)
+  in TabTree.create_node n.id (FormulaSet.singleton new_node_value) new_children n.rule n.back_edge
 
 let rec rule_to_string (rule: rule): string = 
   match rule with 
