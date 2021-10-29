@@ -1,4 +1,8 @@
 open PrettyPrint
+open EnvResources
+
+(* Init a reference to empty map *)
+let map = ref LVars.empty
 
 let create_act (act: string): Ast.Act.t = 
   {Ast.Act.name = act}
@@ -93,3 +97,15 @@ and apply_laws_conjunction (l: Ast.Formula.t) (r: Ast.Formula.t): Ast.Formula.t 
     then apply_laws l 
     else create_verdict false 
   | (_, _) -> create_conjunction (apply_laws l) (apply_laws r)
+
+(* Function to traverse the ast of a formula and add entries to map: LVar -> Formula *)
+let rec populate_map (f: Ast.Formula.t): unit = 
+  match f with
+  | Ast.Formula.Verdict(x) -> ()
+  | Ast.Formula.LVar(x) -> ()
+  | Ast.Formula.Disjunction(x) -> populate_map x.left; populate_map x.right
+  | Ast.Formula.Conjunction(x) -> populate_map x.left; populate_map x.right 
+  | Ast.Formula.Existential(x) -> populate_map x.cont 
+  | Ast.Formula.Universal(x) -> populate_map x.cont 
+  | Ast.Formula.Min(x) -> map := LVars.add x.lvar f !map
+  | Ast.Formula.Max(x) -> map := LVars.add x.lvar f !map

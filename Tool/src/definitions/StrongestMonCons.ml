@@ -6,6 +6,7 @@
 open PrettyPrint
 open EnvFunctions
 open SMCTableauRules
+open EnvResources
 
 (* Function that takes a formula and eliminates the existential modalities *)
 let rec elim_em (f: Ast.Formula.t): Ast.Formula.t = 
@@ -47,7 +48,14 @@ let get_strongest_mon_cons (f: Ast.Formula.t): Ast.Formula.t =
         print_string("After eliminating minimal fixed points, we get ");
         pretty_print_formula step2;
         print_endline("\n");
-        print_endline("The Tableau for Eliminating the Disjunctions is: \n");
-        print_endline (print_tab_tree (create_tableau [step2]) "");
+        
+        let tableau = create_tableau (FormulaSet.singleton step2) Nodes.empty in
+          print_endline("The Tableau for Eliminating the Disjunctions is: \n");
+          print_endline (print_tab_tree tableau "");
+                
+          (* let relabelled = relabel_tableau tableau in
+            print_endline("The Tableau after relabelling is: \n");
+            print_endline (print_tab_tree relabelled ""); *)
+
         step2
 

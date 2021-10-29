@@ -11,7 +11,7 @@ XOCamlBuildExtraArgs:  -use-menhir -yaccflag --infer
 
 Library "utils"
     Path: src/utils
-    Modules: Ast, PrettyPrint, EnvFunctions
+    Modules: Ast, PrettyPrint, EnvFunctions, EnvResources
 
 Library "parsing"
     Path: src/parsing

@@ -72,9 +72,10 @@ let max (lvar: Ast.Formula.LVar.t) (cont: Ast.Formula.t) = Formula.Max {
 /* Note that we want OR/AND to have lower precendence than <>/[] because <a>.t | t needs to be parsed as (<a>.t) | (t) */
 /* If we switch the priority around, we end up with <a>.(t | t)  */
 
+%left MIN MAX
 %left OP_ROUND
 %left AND OR
-%left OP_BOX OP_ANGLE MIN MAX
+%left OP_BOX OP_ANGLE 
 
 %start rechml
 %type <Ast.Formula.t> rechml
@@ -94,7 +95,7 @@ formula:
   | existential     {$1}
   | universal       {$1}
   | min             {$1}
-  | max             {$1} 
+  | max             {$1}
 ;
 
 verdict:
@@ -107,6 +108,7 @@ lvar:
 
 disjunction:
   | left=formula OR right=formula                                         %prec OR        {disjunction left right}
+  | OP_ROUND left=formula OR right=formula CLS_ROUND                      %prec OR        {disjunction left right}
   | left=formula OR OP_ROUND right=formula CLS_ROUND                      %prec OP_ROUND  {disjunction left right}
   | OP_ROUND left=formula CLS_ROUND OR right=formula                      %prec OP_ROUND  {disjunction left right}
   | OP_ROUND left=formula CLS_ROUND OR OP_ROUND right=formula CLS_ROUND   %prec OP_ROUND  {disjunction left right}
@@ -114,6 +116,7 @@ disjunction:
 
 conjunction:
   | left=formula AND right=formula                                        %prec AND       {conjunction left right}
+  | OP_ROUND left=formula AND right=formula CLS_ROUND                     %prec AND       {conjunction left right}
   | left=formula AND OP_ROUND right=formula CLS_ROUND                     %prec OP_ROUND  {conjunction left right}
   | OP_ROUND left=formula CLS_ROUND AND right=formula                     %prec OP_ROUND  {conjunction left right}
   | OP_ROUND left=formula CLS_ROUND AND OP_ROUND right=formula CLS_ROUND  %prec OP_ROUND  {conjunction left right}
