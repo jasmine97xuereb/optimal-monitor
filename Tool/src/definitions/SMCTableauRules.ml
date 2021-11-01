@@ -2,6 +2,7 @@ open EnvFunctions
 open EnvResources
 open PrettyPrint
 open Ast
+exception Foo of string
 
 (* For each node n and its children, there is a rule st n is labelled with the premise and the children with its conclusion                 *)
 (* The tableu rule is the rule [a] only if no other rule can be applied                                                                     *)
@@ -94,6 +95,7 @@ let rec set_backedge_targets (t: FormulaSet.t TabTree.tree): FormulaSet.t TabTre
   in inner_set t (get_targets t []) 
 
 (* This function create a tableau using two main functions.                                                        *)
+(* The value at each node/leaf is a set of formulas.                                                               *)
 (* The function create_tableau takes two parameters; a set of formulas and a list visited.                         *)
 (* The list visited stores the nodes created when creating a tableau together with the resp id of those nodes.     *)
 (* If the set of formulas is a singleton of a verdict, then create a leaf node.                                    *)
@@ -141,9 +143,150 @@ and formula_is_lvar (f: Ast.Formula.t): bool =
   | Ast.Formula.LVar(x) -> true
   | _ -> false
 
+(* Given a tableau, this function traverses it bottom up and creates a new disjunction free tableau.  *)  
+(* The value at each node/leaf of the relabelled tableau is a single formula.                         *)
+(* For each leaf node:                                                                                *)
+(*  If it has a back-edge to a node with id n, then relabel the leaf to Xn.                           *)
+(*  If it does not have a back-edge then if it contains tt, label it tt, else label it ff.            *)
+(* For each non-leaf node with id m:                                                                  *)
+(*  If it is the target of a back-edge then label it max Xm.m' where m' is the child.                 *)
+(*  Else if it not the target of a back-edge:                                                         *)
+(*    If node m has children with rules BoxAB, Disjunction, Max, X, TT, FF then inherit the children. *)
+(*    If node m has children with rule BoxA, then inherit the children and prefix them with [a].      *)
+(*    If node m has children with rule AND, then inherit the children and conjunct them.              *)
+
+let rec relabel_tableau (t: FormulaSet.t TabTree.tree): Ast.Formula.t TabTree.tree = 
+  match t with 
+  | TabTree.Leaf(x) -> 
+    let relabel_leaf = 
+      if x.back_edge_target >= 0 
+      then create_lvar ("X" ^ (string_of_int x.back_edge_target))
+      else if FormulaSet.exists (fun x -> formula_is_tt x) x.leaf_value
+      then create_verdict true
+      else create_verdict false
+    in TabTree.create_leaf relabel_leaf x.back_edge_target
+
+  | TabTree.Node(x) ->      
+      if x.back_edge  
+      then 
+        let new_children = List.map (fun y -> relabel_tableau y) x.children in  
+        let cont = try get_child new_children with e -> raise e in
+        let max_formula = create_max {Ast.Formula.LVar.lvar = ("X" ^ (string_of_int x.id))} cont
+        in TabTree.create_node x.id max_formula new_children x.rule x.back_edge
+      else (
+        match x.rule with 
+        | BoxAB | Disjunction | Max | X | TT | FF | None -> inherit_children x
+        | Conjunction -> conjunct_children x
+        | BoxA(a) -> universal_children x a 
+      )
+
+and inherit_children (n: FormulaSet.t TabTree.node): Ast.Formula.t TabTree.tree = 
+  let new_children = List.map (fun y -> relabel_tableau y) n.children in 
+    let new_node_value = try get_child new_children with e -> raise e 
+      in TabTree.create_node n.id new_node_value new_children n.rule n.back_edge
+
+and universal_children (n: FormulaSet.t TabTree.node) (a: Ast.Act.t): Ast.Formula.t TabTree.tree = 
+  let new_children = List.map (fun y -> relabel_tableau y) n.children in 
+    let cont = try get_child new_children with e -> raise e in 
+      let new_node_value = create_universal a cont in     
+        TabTree.create_node n.id new_node_value new_children n.rule n.back_edge
+
+and conjunct_children (n: FormulaSet.t TabTree.node): Ast.Formula.t TabTree.tree = 
+  let new_children = List.map (fun y -> relabel_tableau y) n.children in 
+    let new_node_value =  
+      (* If the node has more than two children after the relabelling, raise an exception.  *)
+      if List.length new_children != 2
+      then raise (Foo "Error in relabelling! The node has more than two children.")    
+      else match ((List.nth new_children 0), (List.nth new_children 1)) with 
+      | (TabTree.Leaf(x), TabTree.Leaf(y)) -> create_conjunction x.leaf_value y.leaf_value 
+      | (TabTree.Leaf(x), TabTree.Node(y)) -> create_conjunction x.leaf_value y.node_value
+      | (TabTree.Node(x), TabTree.Leaf(y)) -> create_conjunction x.node_value y.leaf_value
+      | (TabTree.Node(x), TabTree.Node(y)) -> create_conjunction x.node_value y.node_value
+    in TabTree.create_node n.id new_node_value new_children n.rule n.back_edge
+    
+(* This function takes a list of children and returns a single child value.   *)
+(* If the there is one child, the function raises an exception.               *)
+and get_child (n: Ast.Formula.t TabTree.tree list): Ast.Formula.t =
+  if List.length n != 1 
+  then raise (Foo "Error in relabelling! The node has more than one child.")
+  else match List.hd n with  
+    | TabTree.Leaf(x) -> x.leaf_value 
+    | TabTree.Node(x) -> x.node_value
+    
+let rec rule_to_string (rule: rule): string = 
+  match rule with 
+  | Disjunction -> "or"
+  | Conjunction -> "and"
+  | Max -> "max"
+  | BoxA(x) -> "[" ^ x.name ^ "]" 
+  | BoxAB -> "[a,b]"
+  | X -> "X"
+  | TT -> "tt"
+  | FF -> "ff"
+  | None -> ""
+
+(* Given a tree where each node is a formula set, print its tree representation *)
+let rec print_tab_tree (input: FormulaSet.t TabTree.tree) (tab: string): string = 
+
+  let rec print_leaf (l: FormulaSet.t TabTree.leaf) (tab: string): string = 
+    " " ^ List.fold_left (fun acc x -> acc ^ (formula_to_string x) ^ "; " ) "" (FormulaSet.elements l.leaf_value) 
+    ^ (if l.back_edge_target >= 0 then " back edge to " ^ string_of_int l.back_edge_target else "")
+
+  and print_node (n: FormulaSet.t TabTree.node) (tab: string): string = 
+    (* Print the node value *)
+    let value_string = List.fold_left (fun acc x -> acc ^ (formula_to_string x) ^ "; " ) "" (FormulaSet.elements n.node_value) in
+      (* Print the children *)
+      let rec get_children_string (children: FormulaSet.t TabTree.tree list) (tab: string): string = 
+        match children with
+        | [] -> ""
+        | x::[] -> tab ^ "└─" ^ (print_tab_tree x tab)    
+        | x::xs -> tab ^ "├─" ^ (print_tab_tree x (tab ^ "|") ) ^ "\n" ^ (get_children_string xs tab)
+    in " (" ^ (rule_to_string n.rule) ^ ")" ^ (string_of_int n.id) ^ " ──── " ^ value_string 
+    ^ (if n.back_edge then " back edge target\n" else "\n") 
+    ^ (get_children_string n.children (tab ^ "  "))
+        
+  in match input with
+  | TabTree.Leaf(x) -> print_leaf x tab
+  | TabTree.Node(x) -> print_node x tab 
+
+(* Given a tree where each node is a formula, print its tree representation *)
+let rec print_relabelled_tab (input: Ast.Formula.t TabTree.tree) (tab: string): string = 
+
+  let rec print_leaf (l: Ast.Formula.t TabTree.leaf) (tab: string): string = 
+    " " ^ formula_to_string l.leaf_value 
+    ^ (if l.back_edge_target >= 0 then " back edge to " ^ string_of_int l.back_edge_target else "")
+
+  and print_node (n: Ast.Formula.t TabTree.node) (tab: string) = 
+    (* Print the node value *)
+    let value_string = formula_to_string n.node_value in
+      (* Print the children *)
+      let rec get_children_string (children: Ast.Formula.t TabTree.tree list) (tab: string): string = 
+        match children with
+        | [] -> ""
+        | x::[] -> tab ^ "└─" ^ (print_relabelled_tab x tab)    
+        | x::xs -> tab ^ "├─" ^ (print_relabelled_tab x (tab ^ "|") ) ^ "\n" ^ (get_children_string xs tab)
+    in " (" ^ (rule_to_string n.rule) ^ ")" ^ (string_of_int n.id) ^ " ──── " ^ value_string 
+    ^ (if n.back_edge then " back edge target\n" else "\n") 
+    ^ (get_children_string n.children (tab ^ "  "))
+  
+  in match input with
+  | TabTree.Leaf(x) -> print_leaf x tab
+  | TabTree.Node(x) -> print_node x tab 
 
 
-let rec relabel_tableau (t: FormulaSet.t TabTree.tree): FormulaSet.t TabTree.tree = 
+
+
+
+
+
+
+
+
+  
+
+(* THE VALUE AT EACH NODE OF THE NEW TABLEAU IS A SET OF FORMULAS *)
+
+(* let rec relabel_tableau (t: FormulaSet.t TabTree.tree): FormulaSet.t TabTree.tree = 
   match t with 
   | TabTree.Node(x) ->      
       if x.back_edge  
@@ -199,48 +342,4 @@ let new_children = List.map (fun y -> relabel_tableau y) n.children in
     match List.hd new_children with  (* because we know for sure that this only has one child i.e. children is one list *)
     | TabTree.Leaf(x) -> create_universal a (FormulaSet.choose x.leaf_value) 
     | TabTree.Node(x) -> create_universal a (FormulaSet.choose x.node_value)
-  in TabTree.create_node n.id (FormulaSet.singleton new_node_value) new_children n.rule n.back_edge
-
-let rec rule_to_string (rule: rule): string = 
-  match rule with 
-  | Disjunction -> "or"
-  | Conjunction -> "and"
-  | Max -> "max"
-  | BoxA(x) -> "[" ^ x.name ^ "]" 
-  | BoxAB -> "[a,b]"
-  | X -> "X"
-  | TT -> "tt"
-  | FF -> "ff"
-  | None -> ""
-
-
-(* Given a tree, print its tree representation *)
-let rec print_tab_tree (input: FormulaSet.t TabTree.tree) (tab: string) = 
-
-  let rec print_leaf (l: FormulaSet.t TabTree.leaf) (tab: string) = 
-    " " ^ List.fold_left (fun acc x -> acc ^ (formula_to_string x) ^ "; " ) "" (FormulaSet.elements l.leaf_value) 
-    ^ (if l.back_edge_target >= 0 then " back edge to " ^ string_of_int l.back_edge_target else "")
-
-  and print_node (n: FormulaSet.t TabTree.node) (tab: string) = 
-    (* Print the node value *)
-    let value_string = List.fold_left (fun acc x -> acc ^ (formula_to_string x) ^ "; " ) "" (FormulaSet.elements n.node_value) in
-
-      (* Print the children *)
-      let rec get_children_string (children: FormulaSet.t TabTree.tree list) (tab: string): string = 
-        match children with
-        | [] -> ""
-        | x::[] -> tab ^ "└─" ^ (print_tab_tree x tab)    
-        | x::xs -> 
-          tab ^ "├─" ^ 
-          (print_tab_tree x (tab ^ "|") ) ^ "\n" ^
-          (get_children_string xs tab)
-
-    in 
-    " (" ^ (rule_to_string n.rule) ^ ")" ^ (string_of_int n.id) ^ " ──── " ^ value_string 
-    ^ (if n.back_edge then " back edge target\n" else "\n") 
-    ^ (get_children_string n.children (tab ^ "  "))
-        
-  
-  in match input with
-  | TabTree.Leaf(x) -> print_leaf x tab
-  | TabTree.Node(x) -> print_node x tab 
+  in TabTree.create_node n.id (FormulaSet.singleton new_node_value) new_children n.rule n.back_edge *)

@@ -54,8 +54,8 @@ let get_strongest_mon_cons (f: Ast.Formula.t): Ast.Formula.t =
           print_endline (print_tab_tree tableau "");
                 
           let relabelled = relabel_tableau tableau in
-            print_endline("The Tableau after relabelling is: \n");
-            print_endline (print_tab_tree relabelled "");
+            print_endline("\nThe Tableau after relabelling is: \n");
+            print_endline (print_relabelled_tab relabelled "");
 
         step2
 
