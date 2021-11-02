@@ -11,8 +11,8 @@ let main =
   let input = (Sys.argv.(1) ^ "\n") in 
     let formula = 
       try parse_formula input 
-      with _ ->   (* handle all possible exceptions *) 
-        print_endline("There seems to be some problem parsing your formula! Make sure that you used proper bracketing!"); 
+      with _ ->  
+        print_endline("There seems to be some problem parsing your formula!"); 
         exit 0;
     in 
     
@@ -22,7 +22,12 @@ let main =
 
     populate_map formula;
     print_endline("The map is: ");
-    LVars.iter (fun x f -> print_endline( x.lvar ^ " -> " ^ (formula_to_string f)) ) !map;
+    LVars.iter (fun x f -> print_endline( x ^ " -> " ^ (formula_to_string f)) ) !map;
     print_endline("\n");
     
     get_strongest_mon_cons formula
+
+
+
+
+

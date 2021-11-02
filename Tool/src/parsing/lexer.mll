@@ -19,6 +19,8 @@ rule token = parse
   |'|'                            {OR}
   |"min"                          {MIN}
   |"max"                          {MAX}
+  |"tt"                           {TT}
+  |"ff"                           {FF}
   |bletter+as lxm                 {LVAR(lxm)}
   |sletter+as lxm                 {VAR(lxm)}
   |'\n'                           {EOL}

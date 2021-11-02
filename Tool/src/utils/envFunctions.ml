@@ -4,108 +4,59 @@ open EnvResources
 (* Init a reference to empty map *)
 let map = ref LVars.empty
 
-let create_act (act: string): Ast.Act.t = 
-  {Ast.Act.name = act}
-
-let create_verdict (v: bool): Ast.Formula.t = 
-  Ast.Formula.Verdict{Ast.Formula.Verdict.verdict = v}
-
-let create_lvar (lvar: string): Ast.Formula.t = 
-  Ast.Formula.LVar{lvar}
-
-let create_disjunction (l: Ast.Formula.t) (r: Ast.Formula.t): Ast.Formula.t = 
-  Ast.Formula.Disjunction {
-    Ast.Formula.Disjunction.left = l;
-    Ast.Formula.Disjunction.right = r;
-  }
-
-let create_conjunction (l: Ast.Formula.t) (r: Ast.Formula.t): Ast.Formula.t = 
-  Ast.Formula.Conjunction {
-    Ast.Formula.Conjunction.left = l;
-    Ast.Formula.Conjunction.right = r;
-  }
-
-let create_existential (act: Ast.Act.t) (cont: Ast.Formula.t): Ast.Formula.t = 
-  Ast.Formula.Existential {
-    Ast.Formula.Existential.act = act;
-    Ast.Formula.Existential.cont = cont;
-  }
-
-let create_universal (act: Ast.Act.t) (cont: Ast.Formula.t): Ast.Formula.t = 
-  Ast.Formula.Universal {
-    Ast.Formula.Universal.act = act;
-    Ast.Formula.Universal.cont = cont;
-  }
- 
-let create_min (lvar: Ast.Formula.LVar.t) (cont: Ast.Formula.t): Ast.Formula.t = 
-  Ast.Formula.Min {
-    Ast.Formula.Min.lvar = lvar;
-    Ast.Formula.Min.cont = cont;
-  }
-
-let create_max (lvar: Ast.Formula.LVar.t) (cont: Ast.Formula.t): Ast.Formula.t = 
-  Ast.Formula.Max {
-    Ast.Formula.Max.lvar = lvar;
-    Ast.Formula.Max.cont = cont;
-  } 
-
-
 (* Function that takes a formula and attempts to simplify it using the Laws of Boolean Algebra *)
 (* We only check for two laws: Annulment Law & Identity Law                                    *)
 (* Annulment Law: A and false = false, A or true = true                                        *)
 (* Identity Law: A and true = true, A or false = A                                             *)
 
-let rec apply_laws (f: Ast.Formula.t): Ast.Formula.t = 
+let rec simplify (f: Ast.formula): Ast.formula = 
   match f with 
-  | Ast.Formula.Verdict(x) -> f
-  | Ast.Formula.LVar(x) -> f 
-  | Ast.Formula.Disjunction(x) -> apply_laws_disjunction x.left x.right
-  | Ast.Formula.Conjunction(x) -> apply_laws_conjunction x.left x.right 
-  | Ast.Formula.Existential(x) -> create_existential x.act (apply_laws x.cont)
-  | Ast.Formula.Universal(x) -> create_universal x.act (apply_laws x.cont)
-  | Ast.Formula.Min(x) -> create_min x.lvar (apply_laws x.cont)
-  | Ast.Formula.Max(x) -> create_max x.lvar (apply_laws x.cont)
-
-and apply_laws_disjunction (l: Ast.Formula.t) (r: Ast.Formula.t): Ast.Formula.t = 
-  match (l, r) with 
-  | (Ast.Formula.Verdict(x), Ast.Formula.Verdict(y)) -> 
-    if x.verdict || y.verdict 
-    then create_verdict true
-    else create_verdict false
-  | (Ast.Formula.Verdict(x), _) -> 
-    if x.verdict 
-    then create_verdict true 
-    else apply_laws r 
-  | (_, Ast.Formula.Verdict(y)) -> 
-    if y.verdict 
-    then create_verdict true 
-    else apply_laws l 
-  | (_, _) -> create_disjunction (apply_laws l) (apply_laws r)
-
-and apply_laws_conjunction (l: Ast.Formula.t) (r: Ast.Formula.t): Ast.Formula.t = 
-  match (l, r) with 
-  | (Ast.Formula.Verdict(x), Ast.Formula.Verdict(y)) -> 
-    if x.verdict && y.verdict 
-    then create_verdict true
-    else create_verdict false
-  | (Ast.Formula.Verdict(x), _) -> 
-    if x.verdict 
-    then apply_laws r 
-    else create_verdict false 
-  | (_, Ast.Formula.Verdict(y)) -> 
-    if y.verdict 
-    then apply_laws l 
-    else create_verdict false 
-  | (_, _) -> create_conjunction (apply_laws l) (apply_laws r)
+  | TT | FF | LVar _ -> f
+  | Existential(a, cont) -> Existential(a, simplify cont)
+  | Universal(a, cont) -> Universal(a, simplify cont)
+  | Min(x, cont) -> Min(x, simplify cont)
+  | Max(x, cont) -> Max(x,simplify cont)
+  | Disjunction(l, r) -> let l_smp = simplify l in 
+                          begin
+                          match l_smp with
+                          | TT -> TT
+                          | FF -> simplify r
+                          | _  -> let r_smp = simplify r in
+                                  match r_smp with
+                                  | TT -> TT
+                                  | FF -> l_smp
+                                  | _ -> Disjunction(l_smp,r_smp)
+                          end                     
+  | Conjunction(l, r) -> let l_smp = simplify l in 
+                          begin
+                          match l_smp with
+                          | TT -> simplify r
+                          | FF -> FF
+                          | _  -> let r_smp = simplify r in
+                                  match r_smp with
+                                  | TT -> l_smp
+                                  | FF -> FF
+                                  | _ -> Conjunction(l_smp, r_smp)
+                          end
 
 (* Function to traverse the ast of a formula and add entries to map: LVar -> Formula *)
-let rec populate_map (f: Ast.Formula.t): unit = 
+let rec populate_map (f: Ast.formula): unit = 
   match f with
-  | Ast.Formula.Verdict(x) -> ()
-  | Ast.Formula.LVar(x) -> ()
-  | Ast.Formula.Disjunction(x) -> populate_map x.left; populate_map x.right
-  | Ast.Formula.Conjunction(x) -> populate_map x.left; populate_map x.right 
-  | Ast.Formula.Existential(x) -> populate_map x.cont 
-  | Ast.Formula.Universal(x) -> populate_map x.cont 
-  | Ast.Formula.Min(x) -> map := LVars.add x.lvar f !map
-  | Ast.Formula.Max(x) -> map := LVars.add x.lvar f !map
+  | TT | FF | LVar _ -> ()
+  | Disjunction(l, r) -> populate_map l; populate_map r
+  | Conjunction(l, r) -> populate_map l; populate_map r 
+  | Existential(a, cont) -> populate_map cont 
+  | Universal(a, cont) -> populate_map cont 
+  | Min(x, cont) -> map := LVars.add x f !map; populate_map cont
+  | Max(x, cont) -> map := LVars.add x f !map; populate_map cont
+
+(* Function to traverse the ast of a formula and add entries to map: LVar -> Formula *)
+let rec update_map (f: Ast.formula): unit = 
+  match f with
+  | TT | FF | LVar _ -> ()
+  | Disjunction(l, r) -> update_map l; update_map r
+  | Conjunction(l, r) -> update_map l; update_map r 
+  | Existential(a, cont) -> update_map cont 
+  | Universal(a, cont) -> update_map cont 
+  | Min(x, cont) -> map := LVars.update x (fun _ -> Some f) !map; update_map cont
+  | Max(x, cont) -> map := LVars.update x (fun _ -> Some f) !map; update_map cont

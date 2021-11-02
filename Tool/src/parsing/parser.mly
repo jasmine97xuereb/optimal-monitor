@@ -5,57 +5,12 @@
 /* First Part */
 
 %{
-open Ast
-
-let action (a: string) = {
-    Act.name = a;
-  }
-
-let lvar (x: string) = {
-    Formula.LVar.lvar = x;
-  }
-
-let verdict (x: string) = 
-  match x with 
-  | "t" -> { Formula.Verdict.verdict = true } 
-  | "f" -> { Formula.Verdict.verdict = false }
-  | _ -> raise Not_found
-
-let disjunction (l: Ast.Formula.t) (r: Ast.Formula.t) = Formula.Disjunction {
-    Formula.Disjunction.left = l;
-    Formula.Disjunction.right = r;
-  }
-
-let conjunction (l: Ast.Formula.t) (r: Ast.Formula.t) = 
-  Formula.Conjunction {
-    Formula.Conjunction.left = l;
-    Formula.Conjunction.right = r;
-  }
-
-let existential (act: Ast.Act.t) (cont: Ast.Formula.t) = Formula.Existential {
-  Formula.Existential.act = act;
-  Formula.Existential.cont = cont;
-}
-
-let universal (act: Ast.Act.t) (cont: Ast.Formula.t) = Formula.Universal {
-  Formula.Universal.act = act;
-  Formula.Universal.cont = cont;
-}
- 
-let min (lvar: Ast.Formula.LVar.t) (cont: Ast.Formula.t) = Formula.Min {
-  Formula.Min.lvar = lvar;
-  Formula.Min.cont = cont;
-}
-
-let max (lvar: Ast.Formula.LVar.t) (cont: Ast.Formula.t) = Formula.Max {
-  Formula.Max.lvar = lvar;
-  Formula.Max.cont = cont;
-}
-
+  open Ast
 %}
 
 %token <string> LVAR
 %token <string> VAR
+%token TT FF
 %token DOT
 %token AND
 %token OR
@@ -78,7 +33,7 @@ let max (lvar: Ast.Formula.LVar.t) (cont: Ast.Formula.t) = Formula.Max {
 %left OP_BOX OP_ANGLE 
 
 %start rechml
-%type <Ast.Formula.t> rechml
+%type <Ast.formula> rechml
 
 /* Second Part */
 %% 
@@ -88,8 +43,9 @@ rechml:
 ;
 
 formula:
-  | verdict         {Formula.Verdict($1)}
-  | lvar            {Formula.LVar($1)}
+  | tt              {$1}
+  | ff              {$1}
+  | lvar            {LVar($1)}
   | disjunction     {$1} 
   | conjunction     {$1}
   | existential     {$1}
@@ -98,48 +54,52 @@ formula:
   | max             {$1}
 ;
 
-verdict:
-  | v = VAR                                                               {verdict v} 
+tt:
+  | TT                                                                    {TT}
+;
+
+ff:
+  | FF                                                                    {FF} 
 ; 
 
 lvar:
-  | x = LVAR                                                              {lvar x}
+  | x = LVAR                                                              {x}
 ;
 
 disjunction:
-  | left=formula OR right=formula                                         %prec OR        {disjunction left right}
-  | OP_ROUND left=formula OR right=formula CLS_ROUND                      %prec OR        {disjunction left right}
-  | left=formula OR OP_ROUND right=formula CLS_ROUND                      %prec OP_ROUND  {disjunction left right}
-  | OP_ROUND left=formula CLS_ROUND OR right=formula                      %prec OP_ROUND  {disjunction left right}
-  | OP_ROUND left=formula CLS_ROUND OR OP_ROUND right=formula CLS_ROUND   %prec OP_ROUND  {disjunction left right}
+  | left=formula OR right=formula                                         %prec OR        {Disjunction (left, right)}
+  | OP_ROUND left=formula OR right=formula CLS_ROUND                      %prec OR        {Disjunction (left, right)}
+  | left=formula OR OP_ROUND right=formula CLS_ROUND                      %prec OP_ROUND  {Disjunction (left, right)}
+  | OP_ROUND left=formula CLS_ROUND OR right=formula                      %prec OP_ROUND  {Disjunction (left, right)}
+  | OP_ROUND left=formula CLS_ROUND OR OP_ROUND right=formula CLS_ROUND   %prec OP_ROUND  {Disjunction (left, right)}
 ;
 
 conjunction:
-  | left=formula AND right=formula                                        %prec AND       {conjunction left right}
-  | OP_ROUND left=formula AND right=formula CLS_ROUND                     %prec AND       {conjunction left right}
-  | left=formula AND OP_ROUND right=formula CLS_ROUND                     %prec OP_ROUND  {conjunction left right}
-  | OP_ROUND left=formula CLS_ROUND AND right=formula                     %prec OP_ROUND  {conjunction left right}
-  | OP_ROUND left=formula CLS_ROUND AND OP_ROUND right=formula CLS_ROUND  %prec OP_ROUND  {conjunction left right}
+  | left=formula AND right=formula                                        %prec AND       {Conjunction (left, right)}
+  | OP_ROUND left=formula AND right=formula CLS_ROUND                     %prec AND       {Conjunction (left, right)}
+  | left=formula AND OP_ROUND right=formula CLS_ROUND                     %prec OP_ROUND  {Conjunction (left, right)}
+  | OP_ROUND left=formula CLS_ROUND AND right=formula                     %prec OP_ROUND  {Conjunction (left, right)}
+  | OP_ROUND left=formula CLS_ROUND AND OP_ROUND right=formula CLS_ROUND  %prec OP_ROUND  {Conjunction (left, right)}
 ;
 
 existential:
-  | OP_ANGLE act=action CLS_ANGLE cont=formula                            %prec OP_ANGLE  {existential act cont}
+  | OP_ANGLE act=action CLS_ANGLE cont=formula                            %prec OP_ANGLE  {Existential (act, cont)}
 ;
 
 universal:
-  | OP_BOX act=action CLS_BOX cont=formula                                %prec OP_BOX    {universal act cont}
+  | OP_BOX act=action CLS_BOX cont=formula                                %prec OP_BOX    {Universal (act, cont)}
 ;
 
 min:
-  | MIN lvar=lvar DOT cont=formula                                        %prec MIN       {min lvar cont}
-  | MIN lvar=lvar DOT OP_ROUND cont=formula CLS_ROUND                     %prec MIN       {min lvar cont}
+  | MIN lvar=lvar DOT cont=formula                                        %prec MIN       {Min (lvar, cont)}
+  | MIN lvar=lvar DOT OP_ROUND cont=formula CLS_ROUND                     %prec MIN       {Min (lvar, cont)}
 ;
 
 max:
-  | MAX lvar=lvar DOT cont=formula                                        %prec MAX       {max lvar cont}
-  | MAX lvar=lvar DOT OP_ROUND cont=formula CLS_ROUND                     %prec MAX       {max lvar cont}
+  | MAX lvar=lvar DOT cont=formula                                        %prec MAX       {Max (lvar, cont)}
+  | MAX lvar=lvar DOT OP_ROUND cont=formula CLS_ROUND                     %prec MAX       {Max (lvar, cont)}
 ;
 
 action: 
-  | act = VAR                                                                             {action act} 
+  | act = VAR                                                                             {act} 
 ;

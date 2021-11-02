@@ -4,7 +4,7 @@ open Ast
 (* A user-defined type to desribe the tableau rules     *)
 (* The rule None signifies that no rule can be applied  *)
 
-type rule = Disjunction | Conjunction | Max | BoxA of Act.t | BoxAB | X | TT | FF | None
+type rule = Disjunction | Conjunction | Max | BoxA of action | BoxAB | X | TT | FF | None
 
 (* A tree can either be a leaf or a node                                    *)
 (* A leaf contains:                                                         *)
@@ -52,10 +52,10 @@ module TabTree =
 
 (* Map from LVars to Formulas used for min and max unfoldings *)
 (* The key is an LVar *)
-module LVars = Map.Make(struct type t = Ast.Formula.LVar.t let compare = compare end)
+module LVars = Map.Make(struct type t = Ast.variable let compare = compare end)
 
 (* Set of Formulas *)
-module FormulaSet = Set.Make(struct type t = Ast.Formula.t let compare = compare end)
+module FormulaSet = Set.Make(struct type t = Ast.formula let compare = compare end)
 
 let nodeCounter = ref 0
 
