@@ -54,8 +54,11 @@ module TabTree =
 (* The key is an LVar *)
 module LVars = Map.Make(struct type t = Ast.variable let compare = compare end)
 
-(* Set of Formulas *)
+(* Set of formulas *)
 module FormulaSet = Set.Make(struct type t = Ast.formula let compare = compare end)
+
+(* Set of variables *)
+module VarSet = Set.Make(struct type t = Ast.variable let compare = compare end)
 
 let nodeCounter = ref 0
 

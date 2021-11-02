@@ -20,7 +20,10 @@ let main =
     pretty_print_formula formula;
     print_endline("\n");
 
-    populate_map formula;
+    (* let free = FormulaSet.elements (fv formula FormulaSet.empty) in
+    List.iter (fun x -> print_string ((formula_to_string x) ^ " " )) free; *)
+
+    let formula = populate_map formula VarSet.empty in
     print_endline("The map is: ");
     LVars.iter (fun x f -> print_endline( x ^ " -> " ^ (formula_to_string f)) ) !map;
     print_endline("\n");
