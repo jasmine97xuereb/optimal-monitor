@@ -116,3 +116,13 @@ let rec update_map (f: Ast.formula): unit =
   | Universal(a, cont) -> update_map cont 
   | Min(x, cont) -> map := LVars.update x (fun _ -> Some f) !map; update_map cont
   | Max(x, cont) -> map := LVars.update x (fun _ -> Some f) !map; update_map cont
+
+let rec disjunction_free (f: Ast.formula): bool = 
+  match f with 
+  | TT | FF | LVar _ -> true
+  | Disjunction(l, r) -> false
+  | Conjunction(l, r) -> (disjunction_free l) && (disjunction_free r)
+  | Existential(_, cont) -> disjunction_free cont
+  | Universal(_, cont) -> disjunction_free cont
+  | Min(_, cont) -> disjunction_free cont
+  | Max(_, cont) -> disjunction_free cont
