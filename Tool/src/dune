@@ -1,0 +1,7 @@
+(include_subdirs unqualified)
+
+(library
+ (name src)
+ (modules prettyPrint envResources envFunctions smcTableauRules strongestMonCons ast)
+ (libraries printbox) 
+)

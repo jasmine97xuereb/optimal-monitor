@@ -12,6 +12,7 @@ XOCamlBuildExtraArgs:  -use-menhir -yaccflag --infer
 Library "utils"
     Path: src/utils
     Modules: Ast, PrettyPrint, EnvFunctions, EnvResources
+    BuildDepends: printbox
 
 Library "parsing"
     Path: src/parsing
@@ -20,7 +21,7 @@ Library "parsing"
 
 Library "definitions"
     Path: src/definitions
-    Modules: StrongestMonCons, SMCTableauRules
+    Modules: StrongestMonCons, SmcTableauRules
     BuildDepends: utils
 
 Executable "main"

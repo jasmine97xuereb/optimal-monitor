@@ -6,7 +6,7 @@
 
 open PrettyPrint
 open EnvFunctions
-open SMCTableauRules
+open SmcTableauRules
 open EnvResources
 
 (* Function that takes a formula and eliminates the existential modalities *)
@@ -64,5 +64,5 @@ let get_strongest_mon_cons (f: Ast.formula): Ast.formula =
               
               let smp_smc = simplify smc in
               print_endline("\nAfter simplifying, we get " ^ (formula_to_string smp_smc) ^ "\n");
-              smc
+              smp_smc
         )

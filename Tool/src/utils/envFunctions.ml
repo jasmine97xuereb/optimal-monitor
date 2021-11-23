@@ -1,4 +1,3 @@
-open PrettyPrint
 open EnvResources
 
 (* Init a reference to empty map *)
@@ -94,11 +93,11 @@ and subst (f: Ast.formula) (x: Ast.variable) (y: Ast.variable): Ast.formula =
 and fv (f: Ast.formula) (free: VarSet.t): VarSet.t = 
   match f with 
   | TT | FF -> free
-  | LVar(z) -> free
+  | LVar _ -> free
   | Disjunction(l, r) -> VarSet.union (fv l free) (fv r free)
   | Conjunction(l, r) -> VarSet.union (fv l free) (fv r free)
-  | Existential(a, cont) -> fv cont free  
-  | Universal(a, cont) -> fv cont free 
+  | Existential(_, cont) -> fv cont free  
+  | Universal(_, cont) -> fv cont free 
   | Min(x, cont) -> fv cont (VarSet.add x free) 
   | Max(x, cont) -> fv cont (VarSet.add x free)
 
@@ -112,15 +111,15 @@ let rec update_map (f: Ast.formula): unit =
   | TT | FF | LVar _ -> ()
   | Disjunction(l, r) -> update_map l; update_map r
   | Conjunction(l, r) -> update_map l; update_map r 
-  | Existential(a, cont) -> update_map cont 
-  | Universal(a, cont) -> update_map cont 
+  | Existential(_, cont) -> update_map cont 
+  | Universal(_, cont) -> update_map cont 
   | Min(x, cont) -> map := LVars.update x (fun _ -> Some f) !map; update_map cont
   | Max(x, cont) -> map := LVars.update x (fun _ -> Some f) !map; update_map cont
 
 let rec disjunction_free (f: Ast.formula): bool = 
   match f with 
   | TT | FF | LVar _ -> true
-  | Disjunction(l, r) -> false
+  | Disjunction _ -> false
   | Conjunction(l, r) -> (disjunction_free l) && (disjunction_free r)
   | Existential(_, cont) -> disjunction_free cont
   | Universal(_, cont) -> disjunction_free cont

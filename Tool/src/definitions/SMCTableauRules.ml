@@ -20,7 +20,7 @@ let rec apply_rules (unseen: Ast.formula list) (seen: Ast.formula list): Formula
     | Conjunction(l, r) -> (apply_conjunction l r (fs @ seen), Conjunction)
     | Max(_, cont)  -> ([apply_max cont (fs @ seen)], Max)
     | LVar(x) -> ( [ FormulaSet.of_list ( [LVars.find x !map] @ fs @ seen) ], X)
-    | Universal(a, cont) -> apply_universal a cont fs ([f] @ seen)
+    | Universal(a, _) -> apply_universal a fs ([f] @ seen)
     | _ -> ([], None)
   ) 
 
@@ -34,7 +34,7 @@ and apply_max (cont: Ast.formula) (rem: Ast.formula list): FormulaSet.t =
   FormulaSet.of_list (rem @ [cont]) 
 
 (* Apply rule [a] *)
-and apply_universal_a (a: Ast.action) (cont: Ast.formula) (rem: Ast.formula list): FormulaSet.t = 
+and apply_universal_a (a: Ast.action) (rem: Ast.formula list): FormulaSet.t = 
   let filter = fun x -> 
     match x with
     | Universal(b, cont) -> if b = a then Some cont else None 
@@ -46,7 +46,7 @@ and apply_universal_a (a: Ast.action) (cont: Ast.formula) (rem: Ast.formula list
 (*  Check whether there is any other rule that can be applied to the formulas in unseen apart from [a]  *)
 (*  If there is no other rule, apply rule [a]                                                           *)
 
-and apply_universal (a: Ast.action) (cont: Ast.formula) (unseen: Ast.formula list) (seen: Ast.formula list): FormulaSet.t list * rule = 
+and apply_universal (a: Ast.action) (unseen: Ast.formula list) (seen: Ast.formula list): FormulaSet.t list * rule = 
   let check_ab = fun x -> 
     match x with 
     | Universal(b, _) -> (a <> b) 
@@ -58,14 +58,14 @@ and apply_universal (a: Ast.action) (cont: Ast.formula) (unseen: Ast.formula lis
   else (
     let inner_app = apply_rules unseen seen in 
     if (fst inner_app) = []
-    then ([apply_universal_a a cont seen], BoxA(a) ) (* Rule [a] *) 
+    then ([apply_universal_a a seen], BoxA(a) ) (* Rule [a] *) 
     else inner_app (* Some other rule *)
   )
 
 (* Function that checks whether a node with value f has already been created  *)
 (* Returns a boolean value and the id of the node already visited             *)
 
-let rec node_exists (f: FormulaSet.t) (visited: visitedNodes): int = 
+let node_exists (f: FormulaSet.t) (visited: visitedNodes): int = 
   try snd (List.find (fun x -> fst x = f) visited) 
   with Not_found -> -1 
 
@@ -73,7 +73,7 @@ let rec node_exists (f: FormulaSet.t) (visited: visitedNodes): int =
 (* During the first pass, get the target id of all the leaves with back-edges.                *)
 (* During the second pass, update the field back_edge of inner nodes to true accordingly.     *)
 
-let rec set_backedge_targets (t: FormulaSet.t TabTree.tree): FormulaSet.t TabTree.tree = 
+let set_backedge_targets (t: FormulaSet.t TabTree.tree): FormulaSet.t TabTree.tree = 
   
   let rec get_targets (t: FormulaSet.t TabTree.tree) (targets: int list): int list = 
     match t with 
@@ -82,7 +82,7 @@ let rec set_backedge_targets (t: FormulaSet.t TabTree.tree): FormulaSet.t TabTre
   
   and inner_set (t: FormulaSet.t TabTree.tree) (targets: int list): FormulaSet.t TabTree.tree =
     match t with 
-    | TabTree.Leaf(x) -> t
+    | TabTree.Leaf _ -> t
     | TabTree.Node(x) -> 
       if List.mem x.id targets
       then TabTree.create_node x.id x.node_value (List.map (fun y -> inner_set y targets) x.children) x.rule true
@@ -129,7 +129,7 @@ and formula_to_tableau (f: FormulaSet.t) =
   let t = create_tableau f [] 
   in set_backedge_targets t 
 
-let rec formula_is_tt (f: Ast.formula): bool =
+let formula_is_tt (f: Ast.formula): bool =
   match f with 
   | TT -> true
   | _ -> false
@@ -210,7 +210,7 @@ and get_child (n: Ast.formula TabTree.tree list): Ast.formula =
     | TabTree.Node(x) -> x.node_value
    
 
-let rec rule_to_string (rule: rule): string = 
+let rule_to_string (rule: rule): string = 
   match rule with 
   | Disjunction -> "or"
   | Conjunction -> "and"
@@ -225,7 +225,7 @@ let rec rule_to_string (rule: rule): string =
 (* Given a tree where each node is a formula set, print its tree representation *)
 let rec print_tab_tree (input: FormulaSet.t TabTree.tree) (tab: string): string = 
 
-  let rec print_leaf (l: FormulaSet.t TabTree.leaf) (tab: string): string = 
+  let print_leaf (l: FormulaSet.t TabTree.leaf): string = 
     " " ^ List.fold_left (fun acc x -> acc ^ (formula_to_string x) ^ "; " ) "" (FormulaSet.elements l.leaf_value) 
     ^ (if l.back_edge_target >= 0 then " back edge to " ^ string_of_int l.back_edge_target else "")
 
@@ -241,13 +241,13 @@ let rec print_tab_tree (input: FormulaSet.t TabTree.tree) (tab: string): string 
     ^ (get_children_string n.children (tab ^ "  "))
         
   in match input with
-  | TabTree.Leaf(x) -> print_leaf x tab
+  | TabTree.Leaf(x) -> print_leaf x
   | TabTree.Node(x) -> print_node x tab 
 
 (* Given a tree where each node is a formula, print its tree representation *)
 let rec print_relabelled_tab (input: Ast.formula TabTree.tree) (tab: string): string = 
 
-  let rec print_leaf (l: Ast.formula TabTree.leaf) (tab: string): string = 
+  let print_leaf (l: Ast.formula TabTree.leaf): string = 
     " " ^ formula_to_string l.leaf_value 
     ^ (if l.back_edge_target >= 0 then " back edge to " ^ string_of_int l.back_edge_target else "")
 
@@ -263,5 +263,5 @@ let rec print_relabelled_tab (input: Ast.formula TabTree.tree) (tab: string): st
     ^ (get_children_string n.children (tab ^ "  "))
   
   in match input with
-  | TabTree.Leaf(x) -> print_leaf x tab
+  | TabTree.Leaf(x) -> print_leaf x
   | TabTree.Node(x) -> print_node x tab  

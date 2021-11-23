@@ -1,9 +1,9 @@
-open Str
 open Lexing
 open PrettyPrint
 open StrongestMonCons
 open EnvFunctions
 open EnvResources 
+
 
 let parse_formula s = Parser.rechml Lexer.token (from_string s)
 
@@ -16,7 +16,7 @@ let main =
         exit 0;
     in 
     
-    print_endline(pretty_print_ast formula 0);
+    pretty_print_ast formula;
     print_endline("\n");
 
     let formula = populate_map formula VarSet.empty in
@@ -27,9 +27,4 @@ let main =
     (* print_endline("\n"); *)
     
     let smc = get_strongest_mon_cons formula in 
-    print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n")
-
-
-
-
-
+    print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n");

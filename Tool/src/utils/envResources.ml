@@ -1,4 +1,3 @@
-open Map 
 open Ast
 
 (* A user-defined type to desribe the tableau rules     *)
@@ -34,7 +33,7 @@ module TabTree =
       rule: rule;
       back_edge: bool;
     }
-    let rec create_node (i: int) (v: 'a) (c: 'a tree list) (r: rule) (b: bool) =
+    let create_node (i: int) (v: 'a) (c: 'a tree list) (r: rule) (b: bool) =
       Node {
         id = i;
         node_value = v;
@@ -42,7 +41,7 @@ module TabTree =
         rule = r;
         back_edge = b
       }
-    let rec create_leaf (v: 'a) (b: int) =
+    let create_leaf (v: 'a) (b: int) =
       Leaf {
         leaf_value = v;
         back_edge_target = b
