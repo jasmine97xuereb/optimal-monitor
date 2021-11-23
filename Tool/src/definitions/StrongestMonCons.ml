@@ -6,7 +6,7 @@
 
 open PrettyPrint
 open EnvFunctions
-open SmcTableauRules
+open SMCTableauRules
 open EnvResources
 
 (* Function that takes a formula and eliminates the existential modalities *)

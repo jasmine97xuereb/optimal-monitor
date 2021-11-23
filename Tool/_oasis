@@ -21,7 +21,7 @@ Library "parsing"
 
 Library "definitions"
     Path: src/definitions
-    Modules: StrongestMonCons, SmcTableauRules
+    Modules: StrongestMonCons, SMCTableauRules
     BuildDepends: utils
 
 Executable "main"
