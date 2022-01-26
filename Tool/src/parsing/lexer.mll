@@ -2,6 +2,7 @@
   open Parser
 }
 
+let digit = ['0'-'9']
 let sletter = ['a'-'z']
 let bletter = ['A'-'Z']
 let whitespace = [' ' '\t' '\r']
@@ -21,6 +22,6 @@ rule token = parse
   |"max"                          {MAX}
   |"tt"                           {TT}
   |"ff"                           {FF}
-  |bletter+as lxm                 {LVAR(lxm)}
-  |sletter+as lxm                 {VAR(lxm)}
+  |bletter(digit)* as lxm         {LVAR(lxm)}
+  |sletter(sletter|digit)* as lxm {VAR(lxm)}
   |'\n'                           {EOL}

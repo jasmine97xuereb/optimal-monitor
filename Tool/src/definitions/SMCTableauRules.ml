@@ -106,7 +106,8 @@ let rec create_tableau (f: FormulaSet.t) (visited: visitedNodes): FormulaSet.t T
   else if FormulaSet.cardinal f == 1 
   then (
     match FormulaSet.min_elt f with 
-    | TT | FF -> TabTree.create_leaf f (-1)
+    (* | TT | FF -> TabTree.create_leaf f (-1) *)
+    | TT -> TabTree.create_leaf f (-1)
     | _ -> inner_create_tableau f visited
   )
   else inner_create_tableau f visited
@@ -201,7 +202,7 @@ and conjunct_children (n: FormulaSet.t TabTree.node): Ast.formula TabTree.tree =
     in TabTree.create_node n.id new_node_value new_children n.rule n.back_edge
     
 (* This function takes a list of children and returns a single child value.   *)
-(* If the there is one child, the function raises an exception.               *)
+(* If the there is more than one child, the function raises an exception.     *)
 and get_child (n: Ast.formula TabTree.tree list): Ast.formula =
   if List.length n != 1 
   then raise (Foo "Error in relabelling! The node has more than one child.")
