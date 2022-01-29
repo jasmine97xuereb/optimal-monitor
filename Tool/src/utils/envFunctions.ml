@@ -3,18 +3,53 @@ open EnvResources
 (* Init a reference to empty map *)
 let map = ref LVars.empty
 
-(* Function that takes a formula and attempts to simplify it using the Laws of Boolean Algebra *)
-(* We only check for two laws: Annulment Law & Identity Law                                    *)
-(* Annulment Law: A and false = false, A or true = true                                        *)
-(* Identity Law: A and true = true, A or false = A                                             *)
+(* Function that takes a formula and attempts to simplify it using the following axioms:       *)
+(* A1. Annulment Law: A and false = false, A or true = true                                    *)
+(* A2. Identity Law: A and true = true, A or false = A                                         *)
+(* A3. [a]tt = tt                                                                              *)
+(* A4. min X. tt = tt                                                                          *)
+(* A5. max X. X = tt                                                                           *)
+(* A6. max X.[a]X ^ ... ^ [w]X = tt                                                            *)
+
+(* Function to check whether axiom A6 can be applied *)   
+
+let rec axiom (f: Ast.formula) (lvar): bool = 
+  match f with 
+  | Universal(a, cont) -> 
+      if cont = lvar then true 
+      else false
+  | Conjunction(l, r) -> 
+      if axiom l lvar then
+      axiom r lvar
+      else false  
+  | _ -> false
+     
 
 let rec simplify (f: Ast.formula): Ast.formula = 
   match f with 
   | TT | FF | LVar _ -> f
   | Existential(a, cont) -> Existential(a, simplify cont)
-  | Universal(a, cont) -> Universal(a, simplify cont)
-  | Min(x, cont) -> Min(x, simplify cont)
-  | Max(x, cont) -> Max(x,simplify cont)
+  | Universal(a, cont) -> (
+      let smp = simplify cont in 
+      match smp with
+      | TT -> TT
+      | _ -> Universal(a, smp)
+    )
+  | Min(x, cont) ->  (
+      let smp = simplify cont in 
+      match smp with
+      | TT -> TT
+      | _ -> Min(x, smp)
+    )
+  | Max(x, cont) -> ( 
+      let smp = simplify cont in 
+      match smp with
+      | LVar x -> TT
+      | _ -> 
+        if axiom smp (LVar(x)) 
+        then TT 
+        else Max(x, smp)
+    )
   | Disjunction(l, r) -> let l_smp = simplify l in 
                           begin
                           match l_smp with
@@ -37,6 +72,8 @@ let rec simplify (f: Ast.formula): Ast.formula =
                                   | FF -> FF
                                   | _ -> Conjunction(l_smp, r_smp)
                           end
+
+
 
 (* Function to traverse the ast of a formula and add entries to map: LVar -> Formula                                                  *)
 (* Return a formula in case there were LVars that were bound multiple times and the function had to perform some variable renaming.   *)
