@@ -84,10 +84,12 @@ conjunction:
 
 existential:
   | OP_ANGLE act=action CLS_ANGLE cont=formula                            %prec OP_ANGLE  {Existential (act, cont)}
+  | OP_ANGLE act=action CLS_ANGLE OP_ROUND cont=formula CLS_ROUND         %prec OP_ANGLE  {Existential (act, cont)}
 ;
 
 universal:
   | OP_BOX act=action CLS_BOX cont=formula                                %prec OP_BOX    {Universal (act, cont)}
+  | OP_BOX act=action CLS_BOX OP_ROUND cont=formula CLS_ROUND             %prec OP_BOX    {Universal (act, cont)}
 ;
 
 min:

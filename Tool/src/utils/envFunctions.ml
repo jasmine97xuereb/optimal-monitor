@@ -1,4 +1,5 @@
 open EnvResources
+open PrettyPrint
 
 (* Init a reference to empty map *)
 let map = ref LVars.empty
@@ -47,7 +48,7 @@ let rec simplify (f: Ast.formula): Ast.formula =
       | LVar x -> TT
       | _ -> 
         if axiom smp (LVar(x)) 
-        then TT 
+        then TT  
         else Max(x, smp)
     )
   | Disjunction(l, r) -> let l_smp = simplify l in 
@@ -87,7 +88,7 @@ let rec populate_map (f: Ast.formula) (used: VarSet.t): Ast.formula =
   | Universal(a, cont) -> Universal(a, populate_map cont used) 
   | Min(x, cont) -> if VarSet.mem x used
                     then (
-                      let free = fv f VarSet.empty in   
+                      let free = fv f used in   
                       let y = fresh free 1 in
                       let cont = populate_map (subst cont x y) (VarSet.add y used) in
                       let new_min = Ast.Min(y, cont) in
@@ -102,7 +103,7 @@ let rec populate_map (f: Ast.formula) (used: VarSet.t): Ast.formula =
                     ) 
   | Max(x, cont) -> if VarSet.mem x used
                     then (
-                      let free = fv f VarSet.empty in   
+                      let free = fv f used in   
                       let y = fresh free 1 in
                       let cont = populate_map (subst cont x y) (VarSet.add y used) in
                       let new_max = Ast.Max(y, cont) in

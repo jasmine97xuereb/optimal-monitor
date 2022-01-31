@@ -22,9 +22,9 @@ let main =
     let formula = populate_map formula VarSet.empty in
     print_endline("The formula after variable renaming is: " ^ (formula_to_string formula) ^ "\n");
 
-    (* print_endline("The map is: "); *)
-    (* LVars.iter (fun x f -> print_endline( x ^ " -> " ^ (formula_to_string f)) ) !map; *)
-    (* print_endline("\n"); *)
+    print_endline("The map is: "); 
+    LVars.iter (fun x f -> print_endline( x ^ " -> " ^ (formula_to_string f)) ) !map;
+    print_endline("\n");
     
-    let smc = get_strongest_mon_cons formula in 
-    print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n");
+    (* let smc = get_strongest_mon_cons formula in  *)
+    (* print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n"); *)

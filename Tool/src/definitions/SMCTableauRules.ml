@@ -204,9 +204,10 @@ and conjunct_children (n: FormulaSet.t TabTree.node): Ast.formula TabTree.tree =
 (* This function takes a list of children and returns a single child value.   *)
 (* If the there is more than one child, the function raises an exception.     *)
 and get_child (n: Ast.formula TabTree.tree list): Ast.formula =
-  if List.length n != 1 
-  then raise (Foo "Error in relabelling! The node has more than one child.")
-  else match List.hd n with  
+  (* if List.length n != 1  *)
+  (* then raise (Foo "Error in relabelling! The node has more than one child.") *)
+  (* else  *)
+  match List.hd n with  
     | TabTree.Leaf(x) -> x.leaf_value 
     | TabTree.Node(x) -> x.node_value
    
