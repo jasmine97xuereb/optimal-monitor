@@ -92,13 +92,15 @@ let rec populate_map (f: Ast.formula) (used: VarSet.t): Ast.formula =
                       let y = fresh free 1 in
                       let cont = populate_map (subst cont x y) (VarSet.add y used) in
                       let new_min = Ast.Min(y, cont) in
-                      map := LVars.add y new_min !map;
+                      (* map := LVars.add y new_min !map; *)
+                      map := LVars.add y cont !map;
                       new_min
                     )
                     else(
                       print_endline(string_of_int (VarSet.cardinal used));
                       let cont = populate_map cont (VarSet.add x used) in
-                      map := LVars.add x (Ast.Min(x, cont)) !map;
+                      (* map := LVars.add x (Ast.Min(x, cont)) !map; *)
+                      map := LVars.add x cont !map;
                       Ast.Min(x, cont)
                     ) 
   | Max(x, cont) -> if VarSet.mem x used
@@ -107,12 +109,14 @@ let rec populate_map (f: Ast.formula) (used: VarSet.t): Ast.formula =
                       let y = fresh free 1 in
                       let cont = populate_map (subst cont x y) (VarSet.add y used) in
                       let new_max = Ast.Max(y, cont) in
-                      map := LVars.add y new_max !map;
+                      (* map := LVars.add y new_max !map; *)
+                      map := LVars.add y cont !map;
                       new_max
                     )
                     else(
                       let cont = populate_map cont (VarSet.add x used) in
-                      map := LVars.add x (Ast.Max(x, cont)) !map;
+                      (* map := LVars.add x (Ast.Max(x, cont)) !map; *)
+                      map := LVars.add x cont !map;
                       Ast.Max(x, cont)
                     )
 
@@ -151,8 +155,10 @@ let rec update_map (f: Ast.formula): unit =
   | Conjunction(l, r) -> update_map l; update_map r 
   | Existential(_, cont) -> update_map cont 
   | Universal(_, cont) -> update_map cont 
-  | Min(x, cont) -> map := LVars.update x (fun _ -> Some f) !map; update_map cont
-  | Max(x, cont) -> map := LVars.update x (fun _ -> Some f) !map; update_map cont
+  | Min(x, cont) -> map := LVars.update x (fun _ -> Some cont) !map; update_map cont
+  | Max(x, cont) -> map := LVars.update x (fun _ -> Some cont) !map; update_map cont
+  (* | Min(x, cont) -> map := LVars.update x (fun _ -> Some f) !map; update_map cont
+  | Max(x, cont) -> map := LVars.update x (fun _ -> Some f) !map; update_map cont *)
 
 let rec disjunction_free (f: Ast.formula): bool = 
   match f with 
@@ -163,3 +169,14 @@ let rec disjunction_free (f: Ast.formula): bool =
   | Universal(_, cont) -> disjunction_free cont
   | Min(_, cont) -> disjunction_free cont
   | Max(_, cont) -> disjunction_free cont
+
+
+let rec tree_size (f: Ast.formula): int = 
+  match f with
+  | TT | FF | LVar _ -> 1
+  | Disjunction (l, r) -> (tree_size l) + (tree_size r) + 1 
+  | Conjunction(l, r) -> (tree_size l) + (tree_size r) + 1
+  | Existential(_, cont) -> (tree_size cont) + 1
+  | Universal(_, cont) -> (tree_size cont) + 1
+  | Min(_, cont) -> (tree_size cont) + 1
+  | Max(_, cont) -> (tree_size cont) + 1
