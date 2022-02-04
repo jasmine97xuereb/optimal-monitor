@@ -9,8 +9,8 @@ open RandomFormula
 let parse_formula s = Parser.rechml Lexer.token (from_string s)
 
 let main = 
-  (* Random.self_init (); *)
-  (* let formula = random_formula 20 5 ["a";"b"] in *)
+  Random.self_init ();
+  (* let formula = random_formula 200 5 ["a";"b"] in *)
   let input = (Sys.argv.(1) ^ "\n") in
     let formula =
       try parse_formula input

@@ -1,8 +1,12 @@
 open Ast
+open EnvFunctions
 
-exception Null
+exception Random_formula_exception
 exception Empty_List
+exception Empty_Interval
 exception Random_int_exception
+exception Null
+exception Insert_out_of_bounds
 
 let variable index = string_of_int(index)
 
@@ -13,7 +17,7 @@ let rec duplicate elt = function
 
 (* Returns a list of n random integers in [1;max] *)
 let rec random_int_list (max:int) (n:int) =
-  if max = 0 then raise Null
+  if max = 0 then raise Empty_Interval
   else if max = 1 then duplicate 1 n
   else
     let rec random_int_list_h = function
@@ -22,11 +26,32 @@ let rec random_int_list (max:int) (n:int) =
     in
     random_int_list_h n
 
+(* Return the sum of the elements of a list *)
+let sum_list = List.fold_left (+) 0
+
+(* Insert el at position i in lst *)
+let rec insert i el lst =
+  if i = 0 then el::lst
+  else match lst with
+    | [] -> raise Insert_out_of_bounds
+    | h::t -> h::(insert (i-1) el t)
+
+(* Randomly inserts an element in a list *)
+let random_insert_elt el = function
+  | [] -> [el]
+  | lst  -> let i = Random.int (List.length lst) in insert i el lst
+
 (* Returns a list of n random integers whose sum is s *)
 let random_int_sum (s:int) (n:int) =
-  let l = random_int_list s n in
-  let d = List.fold_left (+) 0 l in
-  List.rev_map (fun k -> (k * d) / s) l
+  let random_ints = random_int_list s n in
+  let d = sum_list random_ints in
+  let l = List.filter (fun n -> n > 0) (List.rev_map (fun k -> (k * s) / d) random_ints) in
+  let diff = s - sum_list l in
+  if diff = 0 then l
+  else random_insert_elt diff l
+
+(* Debugging function: checks if one of the elements is zero *)
+let check_zero = List.exists (fun n -> n = 0)
 
 (* Picks a random action in actions *)
 let random_action (actions:action list) =
@@ -92,7 +117,8 @@ let random_arrow_from_formulas (actions:action list) (formulas:Ast.formula list)
  * with variables ranging in [X0,...,X_(max_var-1)]
  * and actions in actions *)
 let rec random_formula (size:int) (max_var:int) (actions:action list): Ast.formula =
-  if size = 0 then raise Null
+  let a = List.length actions in
+  if size = 0 then raise Random_formula_exception
   else if size = 1 then
     if max_var = 0 then
       match Random.bool() with
@@ -108,16 +134,26 @@ let rec random_formula (size:int) (max_var:int) (actions:action list): Ast.formu
     match Random.bool() with
       | true  -> Min(variable(max_var+1), random_formula (size-1) (max_var+1) actions)
       | false -> Max(variable(max_var+1), random_formula (size-1) (max_var+1) actions)
+  else if size - a < 5 then
+    match Random.int 3 with
+      | 0 -> let size_left = Random.int (size - 2) + 1 in Disjunction(random_formula size_left max_var actions, random_formula (size - size_left - 1) max_var actions)
+      | 1 -> Min(variable(max_var+1), random_formula (size-1) (max_var+1) actions)
+      | 2 -> Max(variable(max_var+1), random_formula (size-1) (max_var+1) actions)
+      | _ -> raise Random_int_exception
   else
     match Random.int 4 with
       | 0 -> let size_left = Random.int (size - 2) + 1 in Disjunction(random_formula size_left max_var actions, random_formula (size - size_left - 1) max_var actions)
       | 1 -> Min(variable(max_var+1), random_formula (size-1) (max_var+1) actions)
       | 2 -> Max(variable(max_var+1), random_formula (size-1) (max_var+1) actions)
       | 3 ->
-        let a = random_nonempty_action_set actions in
-        let s = List.length a in
-        let n = Random.int (size - s) + 1 in
-        let l = random_int_sum (size - s) n in
+        let n = (Random.int ((size - a)/5)) + 1 in
+        let l = random_int_sum ((size - a - 3*n)/2) n in
         let random_formulas = List.rev_map (fun n -> random_formula n max_var actions) l in
-          random_arrow_from_formulas a random_formulas
+          (* List.iter (fun phi -> Printf.printf("%d; ") (tree_size phi)) random_formulas; *)
+          (* let form = random_arrow_from_formulas actions random_formulas in *)
+          (*  Printf.printf "\ns=%d\nn=%d\nl=%d\nThe required size is %d, I got %d\n" n n (sum_list l) size (tree_size form); *)
+          (* form; *)
+         random_arrow_from_formulas actions random_formulas
       | _ -> raise Random_int_exception
+
+  
