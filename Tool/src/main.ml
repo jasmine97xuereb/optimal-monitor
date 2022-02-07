@@ -31,3 +31,5 @@ let main =
      *)
     let smc = get_strongest_mon_cons formula in 
     print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n");
+
+    pretty_print_ast smc;
