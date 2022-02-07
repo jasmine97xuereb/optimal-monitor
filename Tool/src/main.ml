@@ -3,24 +3,27 @@ open PrettyPrint
 open StrongestMonCons
 open EnvFunctions
 open EnvResources 
+open RandomFormula
 
 
 let parse_formula s = Parser.rechml Lexer.token (from_string s)
 
 let main = 
-  let input = (Sys.argv.(1) ^ "\n") in 
-    let formula = 
-      try parse_formula input 
-      with _ ->  
-        print_endline("There seems to be some problem parsing your formula!"); 
+  Random.self_init ();
+  (* let formula = random_formula 200 5 ["a";"b"] in *)
+  let input = (Sys.argv.(1) ^ "\n") in
+    let formula =
+      try parse_formula input
+      with _ ->
+        print_endline("There seems to be some problem parsing your formula!");
         exit 0;
-    in 
+    in
     
     let size = tree_size formula in 
     print_endline("tree size is " ^ string_of_int(size));
 
-    (* pretty_print_ast formula; *)
-    (* print_endline("\n"); *)
+    pretty_print_ast formula;
+    print_endline("\n");
 
     let formula = populate_map formula VarSet.empty in
     (* print_endline("The formula after variable renaming is: " ^ (formula_to_string formula) ^ "\n"); *)
