@@ -146,11 +146,10 @@ and formula_is_lvar (f: Ast.formula): bool =
 (*  If it has a back-edge to a node with id n, then relabel the leaf to Xn.                           *)
 (*  If it does not have a back-edge then if it contains tt, label it tt, else label it ff.            *)
 (* For each non-leaf node with id m:                                                                  *)
-(*  If it is the target of a back-edge then label it max Xm.m' where m' is the child.                 *)
-(*  Else if it not the target of a back-edge:                                                         *)
 (*    If node m has children with rules BoxAB, Disjunction, Max, X, TT, FF then inherit the children. *)
 (*    If node m has children with rule BoxA, then inherit the children and prefix them with [a].      *)
 (*    If node m has children with rule AND, then inherit the children and conjunct them.              *)
+(*  If it is the target of a back-edge then label it max Xm.m' is the node label.                     *)
 
 let rec relabel_tableau (t: FormulaSet.t TabTree.tree): Ast.formula TabTree.tree = 
   match t with 
@@ -164,18 +163,20 @@ let rec relabel_tableau (t: FormulaSet.t TabTree.tree): Ast.formula TabTree.tree
     in TabTree.create_leaf relabel_leaf x.back_edge_target
 
   | TabTree.Node(x) ->      
-      if x.back_edge  
+    let new_formula = (
+      match x.rule with 
+      | BoxAB | Disjunction | Max | X | TT | FF | None -> inherit_children x
+      | Conjunction -> conjunct_children x
+      | BoxA(a) -> universal_children x a 
+    ) in
+    if x.back_edge  
       then 
-        let new_children = List.map (fun y -> relabel_tableau y) x.children in  
-        let cont = try get_child new_children with e -> raise e in
-        let max_formula = Max ("X" ^ (string_of_int x.id), cont)
-        in TabTree.create_node x.id max_formula new_children x.rule x.back_edge
-      else (
-        match x.rule with 
-        | BoxAB | Disjunction | Max | X | TT | FF | None -> inherit_children x
-        | Conjunction -> conjunct_children x
-        | BoxA(a) -> universal_children x a 
-      )
+        let children = try get_node_children new_formula with e -> raise e
+        in let value = try get_node_value new_formula with e -> raise e 
+        in let max_formula = Max ("X" ^ (string_of_int x.id), value)
+        in TabTree.create_node x.id max_formula children x.rule x.back_edge
+    else new_formula 
+      
 
 and inherit_children (n: FormulaSet.t TabTree.node): Ast.formula TabTree.tree = 
   let new_children = List.map (fun y -> relabel_tableau y) n.children in 
@@ -204,13 +205,22 @@ and conjunct_children (n: FormulaSet.t TabTree.node): Ast.formula TabTree.tree =
 (* This function takes a list of children and returns a single child value.   *)
 (* If the there is more than one child, the function raises an exception.     *)
 and get_child (n: Ast.formula TabTree.tree list): Ast.formula =
-  (* if List.length n != 1  *)
-  (* then raise (Foo "Error in relabelling! The node has more than one child.") *)
-  (* else  *)
-  match List.hd n with  
-    | TabTree.Leaf(x) -> x.leaf_value 
-    | TabTree.Node(x) -> x.node_value
-   
+  if List.length n != 1 
+  then raise (Foo "Error in relabelling! The node has more than one child.")
+  else 
+    match List.hd n with  
+      | TabTree.Leaf(x) -> x.leaf_value 
+      | TabTree.Node(x) -> x.node_value
+
+and get_node_children (n: Ast.formula TabTree.tree): Ast.formula TabTree.tree list =
+  match n with
+    | TabTree.Node(y) -> y.children
+    | _ -> raise (Foo "Error in relabelling! The node does not have any children!")
+
+and get_node_value (n: Ast.formula TabTree.tree) =
+  match n with
+    | TabTree.Node(y) -> y.node_value
+    | _ -> raise (Foo "Error in relabelling! The node does not have any children!")
 
 let rule_to_string (rule: rule): string = 
   match rule with 

@@ -52,7 +52,7 @@ let get_strongest_mon_cons (f: Ast.formula): Ast.formula =
         then step2
         else ( 
           let tableau = formula_to_tableau (FormulaSet.singleton step2) in
-            (* print_endline("The Tableau for Eliminating the Disjunctions is: \n" ^ (print_tab_tree tableau "")); *)
+            print_endline("The Tableau for Eliminating the Disjunctions is: \n" ^ (print_tab_tree tableau ""));
                   
             let relabelled = relabel_tableau tableau in
               (* print_endline("\nThe Tableau after relabelling is: \n" ^ (print_relabelled_tab relabelled "")); *)
