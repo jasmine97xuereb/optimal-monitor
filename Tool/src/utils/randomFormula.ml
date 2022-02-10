@@ -128,23 +128,23 @@ let rec random_formula (size:int) (max_var:int) (actions:action list): Ast.formu
       match Random.int 3 with
         | 0 -> TT
         | 1 -> FF
-        | 2 -> let index = Random.int max_var in LVar(variable(index))
+        | 2 -> let index = Random.int max_var in LVar("X" ^ variable(index))
         | _ -> raise Random_int_exception
   else if size = 2 then
     match Random.bool() with
-      | true  -> Min(variable(max_var+1), random_formula (size-1) (max_var+1) actions)
-      | false -> Max(variable(max_var+1), random_formula (size-1) (max_var+1) actions)
+      | true  -> Min("X" ^ variable(max_var+1), random_formula (size-1) (max_var+1) actions)
+      | false -> Max("X" ^ variable(max_var+1), random_formula (size-1) (max_var+1) actions)
   else if size - a < 5 then
     match Random.int 3 with
       | 0 -> let size_left = Random.int (size - 2) + 1 in Disjunction(random_formula size_left max_var actions, random_formula (size - size_left - 1) max_var actions)
-      | 1 -> Min(variable(max_var+1), random_formula (size-1) (max_var+1) actions)
-      | 2 -> Max(variable(max_var+1), random_formula (size-1) (max_var+1) actions)
+      | 1 -> Min("X" ^ variable(max_var+1), random_formula (size-1) (max_var+1) actions)
+      | 2 -> Max("X" ^ variable(max_var+1), random_formula (size-1) (max_var+1) actions)
       | _ -> raise Random_int_exception
   else
     match Random.int 4 with
       | 0 -> let size_left = Random.int (size - 2) + 1 in Disjunction(random_formula size_left max_var actions, random_formula (size - size_left - 1) max_var actions)
-      | 1 -> Min(variable(max_var+1), random_formula (size-1) (max_var+1) actions)
-      | 2 -> Max(variable(max_var+1), random_formula (size-1) (max_var+1) actions)
+      | 1 -> Min("X" ^ variable(max_var+1), random_formula (size-1) (max_var+1) actions)
+      | 2 -> Max("X" ^ variable(max_var+1), random_formula (size-1) (max_var+1) actions)
       | 3 ->
         let n = (Random.int ((size - a)/5)) + 1 in
         let l = random_int_sum ((size - a - 3*n)/2) n in

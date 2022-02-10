@@ -28,5 +28,5 @@ Executable "main"
     Path: src
     MainIs: main.ml
     CompiledObject: best
-    BuildDepends: str, utils, parsing, definitions
+    BuildDepends: str, utils, parsing, definitions, csv, test
     CCLib: -std=c++17
