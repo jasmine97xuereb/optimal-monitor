@@ -30,6 +30,7 @@ let rec run_test (upTo: int) (count: int) =
   if count > upTo 
   then print_endline("done")
   else (
+    (* let formula = random_formula 200 5 ["a";"b"] in *)
     let formula = random_formula count 5 ["a"] in
       print_endline("formula is " ^ (formula_to_string formula));
       procedure formula;

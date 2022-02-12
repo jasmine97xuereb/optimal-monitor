@@ -75,50 +75,62 @@ let rec simplify (f: Ast.formula): Ast.formula =
                           end
 
 
+let rec fv (f: Ast.formula) (free: VarSet.t): VarSet.t = 
+  match f with 
+  | TT | FF -> free
+  | LVar x -> VarSet.add x free
+  | Disjunction(l, r) -> VarSet.union (fv l free) (fv r free)
+  | Conjunction(l, r) -> VarSet.union (fv l free) (fv r free)
+  | Existential(_, cont) -> fv cont free  
+  | Universal(_, cont) -> fv cont free 
+  | Min(x, cont) -> VarSet.remove x (fv cont free) 
+  | Max(x, cont) -> VarSet.remove x (fv cont free)
+
 
 (* Function to traverse the ast of a formula and add entries to map: LVar -> Formula                                                  *)
 (* Return a formula in case there were LVars that were bound multiple times and the function had to perform some variable renaming.   *)
 
 let rec populate_map (f: Ast.formula) (used: VarSet.t): Ast.formula = 
-  match f with
-  | TT | FF | LVar _ -> f
-  | Disjunction(l, r) -> let new_l = populate_map l used in Disjunction(new_l, populate_map r (fv new_l used))
-  | Conjunction(l, r) -> let new_l = populate_map l used in Conjunction(new_l, populate_map r (fv new_l used))
-  | Existential(a, cont) -> Existential(a, populate_map cont used)
-  | Universal(a, cont) -> Universal(a, populate_map cont used) 
-  | Min(x, cont) -> if VarSet.mem x used
-                    then (
-                      let free = fv f used in   
-                      let y = fresh free 1 in
-                      let cont = populate_map (subst cont x y) (VarSet.add y used) in
-                      let new_min = Ast.Min(y, cont) in
-                      (* map := LVars.add y new_min !map; *)
-                      map := LVars.add y cont !map;
-                      new_min
-                    )
-                    else(
-                      print_endline(string_of_int (VarSet.cardinal used));
-                      let cont = populate_map cont (VarSet.add x used) in
-                      (* map := LVars.add x (Ast.Min(x, cont)) !map; *)
-                      map := LVars.add x cont !map;
-                      Ast.Min(x, cont)
-                    ) 
-  | Max(x, cont) -> if VarSet.mem x used
-                    then (
-                      let free = fv f used in   
-                      let y = fresh free 1 in
-                      let cont = populate_map (subst cont x y) (VarSet.add y used) in
-                      let new_max = Ast.Max(y, cont) in
-                      (* map := LVars.add y new_max !map; *)
-                      map := LVars.add y cont !map;
-                      new_max
-                    )
-                    else(
-                      let cont = populate_map cont (VarSet.add x used) in
-                      (* map := LVars.add x (Ast.Max(x, cont)) !map; *)
-                      map := LVars.add x cont !map;
-                      Ast.Max(x, cont)
-                    )
+  let rec inner_populate (f: Ast.formula) (used: VarSet.t): Ast.formula * VarSet.t = 
+    match f with
+    | TT | FF | LVar _ -> (f, used)
+    | Disjunction(l, r) -> 
+                      let (new_l, used) = inner_populate l used in 
+                      let (new_r, used) = inner_populate r used in
+                      (Disjunction(new_l, new_r), used)      
+    | Conjunction(l, r) -> 
+                      let (new_l, used) = inner_populate l used in 
+                      let (new_r, used) = inner_populate r used in
+                      (Conjunction(new_l, new_r), used)
+    | Existential(a, cont) -> (Existential(a, fst (inner_populate cont used)), used)
+    | Universal(a, cont) -> (Universal(a, fst (inner_populate cont used)), used) 
+    | Min(x, cont) -> if VarSet.mem x used
+                      then (
+                        let y = fresh used 1 in
+                        let (cont, used) = inner_populate (subst cont x y) (VarSet.add y used) in
+                        let new_min = Ast.Min(y, cont) in
+                        map := LVars.add y cont !map;
+                        (new_min, used)
+                      )
+                      else(
+                        let (cont, used) = inner_populate cont (VarSet.add x used) in
+                        map := LVars.add x cont !map;
+                        (Ast.Min(x, cont), used)
+                      ) 
+    | Max(x, cont) -> if VarSet.mem x used
+                      then (
+                        let y = fresh used 1 in
+                        let (cont, used) = inner_populate (subst cont x y) (VarSet.add y used) in
+                        let new_max = Ast.Max(y, cont) in
+                        map := LVars.add y cont !map;
+                        (new_max, used)
+                      )
+                      else(
+                        let (cont, used) = inner_populate cont (VarSet.add x used) in
+                        map := LVars.add x cont !map;
+                        (Ast.Max(x, cont), used)
+                      )
+in fst (inner_populate f used)
 
 (* Substitute all free occurences of variable x in formula f by variable y. *)
 and subst (f: Ast.formula) (x: Ast.variable) (y: Ast.variable): Ast.formula = 
@@ -132,18 +144,8 @@ and subst (f: Ast.formula) (x: Ast.variable) (y: Ast.variable): Ast.formula =
   | Min(z, cont) -> if z != x then Min(z, subst cont x y) else f 
   | Max(z, cont) -> if z != x then Max(z, subst cont x y) else f
 
-and fv (f: Ast.formula) (free: VarSet.t): VarSet.t = 
-  match f with 
-  | TT | FF -> free
-  | LVar _ -> free
-  | Disjunction(l, r) -> VarSet.union (fv l free) (fv r free)
-  | Conjunction(l, r) -> VarSet.union (fv l free) (fv r free)
-  | Existential(_, cont) -> fv cont free  
-  | Universal(_, cont) -> fv cont free 
-  | Min(x, cont) -> fv cont (VarSet.add x free) 
-  | Max(x, cont) -> fv cont (VarSet.add x free)
-
 and fresh (free: VarSet.t) (count: int): Ast.variable =
+  print_endline("in fresh");
   let v = "X" ^ (string_of_int count) in
   if VarSet.mem v free then fresh free (count+1) else v   
 
