@@ -46,7 +46,7 @@ let get_strongest_mon_cons (f: Ast.formula): Ast.formula =
         print_endline("The formula after eliminating minimal fixed points is: \n" ^ (formula_to_string step2) ^ "\n");
 
         let step2_smp = simplify step2 in
-          print_endline("The simplified formula is: \n" ^ (formula_to_string step1_smp) ^ "\n");
+          print_endline("The simplified formula is: \n" ^ (formula_to_string step2_smp) ^ "\n");
 
           update_map step2_smp; 
           (* print_endline("The updated map is: ");
