@@ -1,4 +1,4 @@
-# The Best a Monitor can Do
+# A Synthesis Tool for Optimal Monitors in a Branching-Time Setting
 
 A tool using OCaml that generates the strongest monitorable consequence from an arbitrary rechHML formula.
 
@@ -55,6 +55,12 @@ eval $(opam env)
 Oasis is a tool used to integrate a configure, build and install system in for OCaml projects.
 ```
 opam install oasis
+eval $(opam env)
+```
+#### Libraries 
+PrintBox is a library used to print nested boxes, lists, arrays, tables in several formats.
+```
+opam install printbox printbox-text
 eval $(opam env)
 ```
 #### To generates a build system, produce the files setup.ml, configure and Makefile, along with some others which can be safely ignored
