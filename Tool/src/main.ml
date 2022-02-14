@@ -30,6 +30,7 @@ let procedure (formula: Ast.formula): Ast.formula =
       smc
 
 let main = 
+  (* perform_tests 100 500 50; *)
   let input = 
     if Array.length Sys.argv > 1
     then (
@@ -66,8 +67,6 @@ let main =
       (* perform_tests 2  *)
 
     
-
- 
 
 
 
