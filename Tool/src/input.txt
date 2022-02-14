@@ -1,6 +1,0 @@
-([c]ff & [m]ff) | 
-(
-  [m]ff & 
-  <c>(max X.([c]ff & [m]ff) | (<c>X & [c]X & [m]ff)) & 
-  [c](max X.([c]ff & [m]ff) | (<c>X & [c]X & [m]ff))
-)
