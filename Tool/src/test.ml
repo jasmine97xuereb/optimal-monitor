@@ -1,4 +1,3 @@
-open Csv
 open Array
 open RandomFormula
 open PrettyPrint
@@ -46,19 +45,19 @@ let rec create_embedded_csv (size: int list) (time: int list) =
 (*       run_test upTo (count+2) *)
 (*   ) *)
 
-let run_test (min_size:int) (max_size:int) (number_instances:int) =
-  let results = make max_size [] in
+let perform_tests (min_size:int) (max_size:int) (number_instances:int) =
+  let oc = open_out "results.csv" in
   for app_size = min_size to max_size do
     for i = 0 to number_instances do
       try (
       let formula = random_formula app_size 0 ["a"] in
       let t = time (fun () -> get_strongest_mon_cons formula) in
       let size = tree_size formula in
-      results.(size) <- t::(results.(size))
+      Printf.fprintf oc "%d,%f\n" size t;
       ) with _ -> ()
     done 
   done;
-  results
+  close_out oc;;
 
 let average = function
   | [] -> 0.
@@ -68,22 +67,27 @@ let average = function
 
 let average_a = Array.map average
   
+(* let print_results_file (results:float array) (filename:string) = *)
+(*   let oc = open_out filename in *)
+(*   Array.iteri (fun i -> fun t -> if t > 0. then Printf.fprintf oc "%d,%f\n" i t) results; *)
+(*   close_out oc;; *)
+  
 
-let perform_tests (min_size:int) (max_size:int) (number_instances:int) =
-  let timings_tests = run_test min_size max_size number_instances in
-  let results = average_a timings_tests in
-  Array.iteri (fun i -> fun t -> if i > min_size then Printf.printf "Size: %d Time: %f\n" i t) results
+(* let perform_tests (min_size:int) (max_size:int) (number_instances:int) = *)
+(*   let timings_tests = run_test min_size max_size number_instances in *)
+(*   let results = average_a timings_tests in *)
+(*   print_results_file results "results.csv";; *)
 
 (* This saves an embedded csv in a csv file specified by fname *)
 (* Documentation for CSV *)
 (* https://github.com/Chris00/ocaml-csv *)
 
-let write_to_file (size: int list) (time: int list) = 
-  let test = create_embedded_csv size time in
-  let ecsv = Csv.input_all(Csv.of_string test) in
-  let fname = "/Users/jasminexuereb/Desktop/phd/OptimalMonitor/Tool/src/example.csv" in
-  Csv.save fname ecsv;
-  print_endline("Saved CSV to file " ^ fname)
+(* let write_to_file (size: int list) (time: int list) =  *)
+(*   let test = create_embedded_csv size time in *)
+(*   let ecsv = Csv.input_all(Csv.of_string test) in *)
+(*   let fname = "/Users/jasminexuereb/Desktop/phd/OptimalMonitor/Tool/src/example.csv" in *)
+(*   Csv.save fname ecsv; *)
+(*   print_endline("Saved CSV to file " ^ fname) *)
  
 
 (* let rec perform_tests (upTo: int) =  *)
