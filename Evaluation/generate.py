@@ -171,14 +171,37 @@ final = ' | '.join(lst)
 # # print(final)
 
 
-# ----------------------------------------- EXCELLENT EXAMPLE. 
-
+# ----------------------------------------- EXAMPLE 1 ----------------------------------------- 
+# This generates formulas of the form max X. -a1-> { -a1-> empty, X} & ... & -an-> { -an-> empty, X}
 
 final = "max X."
 
-# for i in range(complexity*10): 
-for i in range(complexity): 
+for i in range(complexity*10): 
+# for i in range(complexity): 
   var = "a" + str(i)
   final = final + "(<" + var + ">[" + var + "]ff & <" + var + ">X & [" + var + "]([" + var + "]ff | X)) & "
+final = final[:-3]
+# print(final)
+
+
+# ----------------------------------------- EXAMPLE 2 NOT GOOD ----------------------------------------- 
+
+final = ""
+
+
+for i in range(complexity): 
+  inner = ""
+  var1 = "b" + str(i)
+  rec = "X" + str(i)
+  # for i in range(complexity): 
+  for i in range(complexity): 
+    var2 = "a" + str(i)
+    inner = inner + "[" + var2 + "]" + rec + " & <" + var2 + ">" + rec + " & "
+  inner = inner + "[" + var1 + "]ff "
+
+# for i in range(complexity): 
+  final = final + "(min " + rec + "." + inner + ") | " 
+  # final = final + "(min " + rec + ".<a>" + rec + " & [a]" + rec +  " & <b>" + rec + " & [b]" + rec + " & [" + var + "]ff" + " & [" + var + "]ff) | "
+  # final = final + "(<" + var + ">[" + var + "]ff & <" + var + ">X & [" + var + "]([" + var + "]ff | X)) & "
 final = final[:-3]
 print(final)

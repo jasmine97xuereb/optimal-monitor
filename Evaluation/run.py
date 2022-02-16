@@ -24,7 +24,7 @@ def RunToolOnce(mon):
   try: 
     usage_start = resource.getrusage(resource.RUSAGE_CHILDREN)
     command = "../Tool/main.native " + "\"" + mon + "\""
-    subprocess.call(command, env=my_env, stderr=subprocess.STDOUT, timeout=36000, shell=True) # shell=True to print all output 
+    subprocess.call(command, env=my_env, stderr=subprocess.STDOUT, timeout=18000, shell=True) # shell=True to print all output 
     usage_end = resource.getrusage(resource.RUSAGE_CHILDREN)
     time = usage_end.ru_utime - usage_start.ru_utime
   except:
@@ -65,21 +65,22 @@ def GetSMC(complexity, results):
 
   for p in p_lst:
     i = p_lst.index(p) #column of the current property template in results
-    if complexity>1:
-      prev_run = results.iloc[complexity-2][i]
-      if np.isnan(prev_run):
-        time_record.append(np.nan)
-      else:    
-        time_record.append(float(GetData(p)))
-    else: 
-      time_record.append(float(GetData(p)))
+    # if complexity>1:
+    #   prev_run = results.iloc[complexity-2][i]
+    #   if np.isnan(prev_run):
+    #     time_record.append(np.nan)
+    #   else:    
+    #     time_record.append(float(GetData(p)))
+    # else: 
+    time_record.append(float(GetData(p)))
   return time_record
 
 def UpToComplexity(complexity):  
   # results = pd.DataFrame(columns=['Template1','Template2'])
   results = pd.DataFrame(columns=['test'])
 
-  for i in range (1, complexity+1):
+  # for i in range(1, complexity+1, 5):
+  for i in range(1, complexity+1, 2):
     print("For complexity ", i)
     record = GetSMC(i, results)
     # print(record)
@@ -87,7 +88,7 @@ def UpToComplexity(complexity):
   results.index += 1 
   return results
 
-results = UpToComplexity(40)
+results = UpToComplexity(100)
 print(results)
 # results.to_csv("RunningTimesBatch.csv")
 
