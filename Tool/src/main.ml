@@ -30,7 +30,7 @@ let procedure (formula: Ast.formula): Ast.formula =
       smc
 
 let main = 
-  (* perform_tests 100 500 50; *)
+  (* perform_tests 100 100 1 *)
   let input = 
     if Array.length Sys.argv > 1
     then (
@@ -51,9 +51,9 @@ let main =
         exit 0 
     
     in 
-    print_endline("\nThe AST is: ");
+    (* print_endline("\nThe AST is: ");
     pretty_print_ast formula;
-    print_endline("\n");
+    print_endline("\n"); *)
   
     if not (VarSet.is_empty (fv formula VarSet.empty))
     then (
@@ -61,8 +61,12 @@ let main =
       exit 0
     )
     else
+    let size = tree_size formula in 
+    print_endline("tree size is " ^ string_of_int(size));
     let smc = procedure formula  
-      in print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n")
+      in smc
+      (* print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n") *)
+      (* in print_endline(generate_property_detecter smc) *)
 
       (* perform_tests 2  *)
 

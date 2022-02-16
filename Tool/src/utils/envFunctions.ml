@@ -182,3 +182,24 @@ let rec tree_size (f: Ast.formula): int =
   | Universal(_, cont) -> (tree_size cont) + 1
   | Min(_, cont) -> (tree_size cont) + 1
   | Max(_, cont) -> (tree_size cont) + 1
+
+let rec generate_property_detecter (f: Ast.formula): string = 
+  match f with
+  | TT | FF | LVar _ -> formula_to_string f
+  | Max(x, cont) -> "max " ^ x ^ ". (" ^ (generate_property_detecter cont) ^ ")"   
+  | Conjunction _ -> 
+    let new_cont = List.map (fun x -> generate_property_detecter x) (get_inner_ands f [])
+    in "and(" ^ list_to_string new_cont ^ ")"
+  | Universal(a, cont) -> "[" ^ a ^ "]" ^ generate_property_detecter cont
+  | _ -> "Error"
+
+and get_inner_ands (f: Ast.formula) (acc: Ast.formula list): Ast.formula list = 
+  match f with 
+  | Conjunction(l, r) -> let left = (get_inner_ands l ([l] @ acc)) in (get_inner_ands r (left @ [r]))
+  | _ -> acc
+
+and list_to_string (l: string list) = 
+  match l with
+  | [] -> ""
+  | x::[] -> x 
+  | x::xs -> x ^ ", " ^ (list_to_string xs)

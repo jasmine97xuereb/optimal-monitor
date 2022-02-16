@@ -52,6 +52,7 @@ let run_test (min_size:int) (max_size:int) (number_instances:int) =
     for i = 0 to number_instances do
       try (
       let formula = random_formula app_size 0 ["a"] in
+      print_endline("Formula is " ^ (formula_to_string formula));
       let t = time (fun () -> get_strongest_mon_cons formula) in
       let size = tree_size formula in
       results.(size) <- t::(results.(size))

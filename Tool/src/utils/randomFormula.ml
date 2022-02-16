@@ -157,3 +157,10 @@ let rec random_formula (size:int) (max_var:int) (actions:action list): Ast.formu
       | _ -> raise Random_int_exception
 
   
+
+
+
+
+
+
+   
