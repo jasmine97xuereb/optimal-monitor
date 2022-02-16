@@ -30,39 +30,40 @@ let procedure (formula: Ast.formula): Ast.formula =
       smc
 
 let main = 
-  (* perform_tests 100 500 50; *)
-  let input = 
-    if Array.length Sys.argv > 1
-    then (
-      (Sys.argv.(1) ^ "\n")
-    ) 
-    else (
-      print_endline("\nPlease enter the full file path.");
-      let file_path = Scanf.scanf "%s" (fun x -> x) 
-      in let content = read_lines file_path
-      in print_endline("\nThe formula read is: \n" ^ content);
-      content ^ "\n"
-    )
-    in
-    let formula =
-      try parse_formula input
-      with _ ->
-        print_endline("There seems to be some problem parsing your formula!");
-        exit 0 
+  perform_tests 1 1000 300;
+  (* process_tests; *)
+  (* let input =  *)
+  (*   if Array.length Sys.argv > 1 *)
+  (*   then ( *)
+  (*     (Sys.argv.(1) ^ "\n") *)
+  (*   )  *)
+  (*   else ( *)
+  (*     print_endline("\nPlease enter the full file path."); *)
+  (*     let file_path = Scanf.scanf "%s" (fun x -> x)  *)
+  (*     in let content = read_lines file_path *)
+  (*     in print_endline("\nThe formula read is: \n" ^ content); *)
+  (*     content ^ "\n" *)
+  (*   ) *)
+  (*   in *)
+  (*   let formula = *)
+  (*     try parse_formula input *)
+  (*     with _ -> *)
+  (*       print_endline("There seems to be some problem parsing your formula!"); *)
+  (*       exit 0  *)
     
-    in 
-    print_endline("\nThe AST is: ");
-    pretty_print_ast formula;
-    print_endline("\n");
+  (*   in  *)
+  (*   print_endline("\nThe AST is: "); *)
+  (*   pretty_print_ast formula; *)
+  (*   print_endline("\n"); *)
   
-    if not (VarSet.is_empty (fv formula VarSet.empty))
-    then (
-      print_endline("The formula is not closed. Aborting.");
-      exit 0
-    )
-    else
-    let smc = procedure formula  
-      in print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n")
+  (*   if not (VarSet.is_empty (fv formula VarSet.empty)) *)
+  (*   then ( *)
+  (*     print_endline("The formula is not closed. Aborting."); *)
+  (*     exit 0 *)
+  (*   ) *)
+  (*   else *)
+  (*   let smc = procedure formula   *)
+  (*     in print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n") *)
 
       (* perform_tests 2  *)
 
