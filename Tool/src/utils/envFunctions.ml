@@ -183,15 +183,26 @@ let rec tree_size (f: Ast.formula): int =
   | Min(_, cont) -> (tree_size cont) + 1
   | Max(_, cont) -> (tree_size cont) + 1
 
-let rec generate_property_detecter (f: Ast.formula): string = 
-  match f with
-  | TT | FF | LVar _ -> formula_to_string f
-  | Max(x, cont) -> "max " ^ x ^ ". (" ^ (generate_property_detecter cont) ^ ")"   
-  | Conjunction _ -> 
-    let new_cont = List.map (fun x -> generate_property_detecter x) (get_inner_ands f [])
-    in "and(" ^ list_to_string new_cont ^ ")"
-  | Universal(a, cont) -> "[" ^ a ^ "]" ^ generate_property_detecter cont
-  | _ -> "Error"
+let rec generate_property_detecter (f: Ast.formula): unit = 
+  let rec inner_generate (f: Ast.formula): string = 
+    match f with
+    | TT | FF | LVar _ -> formula_to_string f
+    | Max(x, cont) -> "max " ^ x ^ ". (" ^ (inner_generate cont) ^ ")"   
+    | Conjunction _ -> 
+      let new_cont = List.map (fun x -> inner_generate x) (get_inner_ands f [])
+      in "and(" ^ list_to_string new_cont ^ ")"
+    | Universal(a, cont) -> "[" ^ a ^ "]" ^ inner_generate cont
+    | _ -> "Error"
+  in  
+  (* Write to file *)
+  let text = inner_generate f in
+  print_endline("\nPlease enter the full file path of where you want the output to be written.");
+  let file = Scanf.scanf "%s" (fun x -> x) in
+  let oc = open_out file in         (* create or truncate file, return channel *)
+  Printf.fprintf oc "\n%s\n" text;    (* write something *)   
+  print_endline("\nFormula successfully written to file.\n");
+  close_out oc                      (* flush and close the channel *)
+   
 
 and get_inner_ands (f: Ast.formula) (acc: Ast.formula list): Ast.formula list = 
   match f with 

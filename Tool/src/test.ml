@@ -68,7 +68,7 @@ let average = function
 
 let average_a = Array.map average
 
-let process_tests =
+(* let process_tests =
   let csvresults = Csv.load "results.csv" in
   let strresults = Csv.to_array csvresults in
   let cresults = Array.map (fun line -> (int_of_string line.(0),float_of_string line.(1))) strresults in
@@ -78,7 +78,7 @@ let process_tests =
   let results = average_a lresults in
   let strlresults = Array.mapi (fun size ->  fun time -> Array.of_list [string_of_int size;string_of_float time]) results in
   let csvtresults = Csv.of_array strlresults in
-  Csv.save "processed_results.csv" csvtresults;
+  Csv.save "processed_results.csv" csvtresults; *)
   
   
 (* let print_results_file (results:float array) (filename:string) = *)

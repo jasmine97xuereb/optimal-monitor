@@ -63,12 +63,10 @@ let main =
     else
     let size = tree_size formula in 
     print_endline("tree size is " ^ string_of_int(size));
-    let smc = procedure formula  
+    let smc = procedure formula 
       in smc
-      (* print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n") *)
-      (* in print_endline(generate_property_detecter smc) *)
-
-      (* perform_tests 2  *)
+      (* print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n");  
+      generate_property_detecter smc *)
 
     
 
