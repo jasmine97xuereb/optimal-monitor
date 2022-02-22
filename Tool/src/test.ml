@@ -33,25 +33,17 @@ let rec create_embedded_csv (size: int list) (time: int list) =
   | _, _ -> ""
 
 
-(* Count has to be strictly greater than 0 *)
-(* let rec run_test (upTo: int) (count: int) =  *)
-(*   if count > upTo  *)
-(*   then print_endline("done") *)
-(*   else ( *)
-(*     (\* let formula = random_formula 200 5 ["a";"b"] in *\) *)
-(*     let formula = random_formula count 5 ["a"] in *)
-(*       print_endline("formula is " ^ (formula_to_string formula)); *)
-(*       procedure formula; *)
-(*       run_test upTo (count+2) *)
-(*   ) *)
-
 let perform_tests (min_size:int) (max_size:int) (number_instances:int) =
-  let oc = open_out "results.csv" in
+  print_endline("here");
+  let oc = 
+    try open_out "/Users/jasminexuereb/Desktop/phd/OptimalMonitor/Tool/src/results.csv" 
+    with _ -> print_endline("couldn't open file");
+    exit 0
+    in
   for app_size = min_size to max_size do
     for i = 0 to number_instances do
       try (
       let formula = random_formula app_size 0 ["a"] in
-      print_endline("Formula is " ^ (formula_to_string formula));
       let t = time (fun () -> get_strongest_mon_cons formula) in
       let size = tree_size formula in
       Printf.fprintf oc "%d,%f\n" size t;
@@ -68,8 +60,8 @@ let average = function
 
 let average_a = Array.map average
 
-(* let process_tests =
-  let csvresults = Csv.load "results.csv" in
+let process_tests =
+  let csvresults = Csv.load "/Users/jasminexuereb/Desktop/phd/OptimalMonitor/Tool/src/results.csv" in
   let strresults = Csv.to_array csvresults in
   let cresults = Array.map (fun line -> (int_of_string line.(0),float_of_string line.(1))) strresults in
   let max_instance = Array.fold_left (fun m -> fun (size,_) -> max m size) 0 cresults in
@@ -78,33 +70,5 @@ let average_a = Array.map average
   let results = average_a lresults in
   let strlresults = Array.mapi (fun size ->  fun time -> Array.of_list [string_of_int size;string_of_float time]) results in
   let csvtresults = Csv.of_array strlresults in
-  Csv.save "processed_results.csv" csvtresults; *)
+  Csv.save "/Users/jasminexuereb/Desktop/phd/OptimalMonitor/Tool/src/processed_results.csv" csvtresults;
   
-  
-(* let print_results_file (results:float array) (filename:string) = *)
-(*   let oc = open_out filename in *)
-(*   Array.iteri (fun i -> fun t -> if t > 0. then Printf.fprintf oc "%d,%f\n" i t) results; *)
-(*   close_out oc;; *)
-  
-
-(* let perform_tests (min_size:int) (max_size:int) (number_instances:int) = *)
-(*   let timings_tests = run_test min_size max_size number_instances in *)
-(*   let results = average_a timings_tests in *)
-(*   print_results_file results "results.csv";; *)
-
-(* This saves an embedded csv in a csv file specified by fname *)
-(* Documentation for CSV *)
-(* https://github.com/Chris00/ocaml-csv *)
-
-(* let write_to_file (size: int list) (time: int list) =  *)
-(*   let test = create_embedded_csv size time in *)
-(*   let ecsv = Csv.input_all(Csv.of_string test) in *)
-(*   let fname = "/Users/jasminexuereb/Desktop/phd/OptimalMonitor/Tool/src/example.csv" in *)
-(*   Csv.save fname ecsv; *)
-(*   print_endline("Saved CSV to file " ^ fname) *)
- 
-
-(* let rec perform_tests (upTo: int) =  *)
-(*   Random.self_init (); *)
-(*   run_test upTo 1;   *)
-(*   write_to_file [1;2;3] [5;5;5] *)
