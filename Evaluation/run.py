@@ -39,16 +39,14 @@ def RunToolOnce(mon):
 def GetData(p):
   time_arr = []
   df = pd.DataFrame(columns=['Time'])
-  return RunToolOnce(p)
-  # for i in range (0, 1):
-  #   print("running", i)
-  #   t = RunToolOnce(mon) 
-  #   # print(t)
-  #   time_arr.append(t)
-  #   if np.isnan(t):
-  #     break     
-  # df['Time'] = time_arr
-  # return GetMean(df)
+  for i in range (0, 5):
+    print("running", i)
+    t = RunToolOnce(p) 
+    time_arr.append(t)
+    if np.isnan(t):
+      break     
+  df['Time'] = time_arr
+  return GetMean(df)
 
 # get the list of generated properties
 # specify the required number of repetitions by passing this value as a parameter
@@ -65,22 +63,14 @@ def GetSMC(complexity, results):
 
   for p in p_lst:
     i = p_lst.index(p) #column of the current property template in results
-    # if complexity>1:
-    #   prev_run = results.iloc[complexity-2][i]
-    #   if np.isnan(prev_run):
-    #     time_record.append(np.nan)
-    #   else:    
-    #     time_record.append(float(GetData(p)))
-    # else: 
     time_record.append(float(GetData(p)))
   return time_record
 
 def UpToComplexity(complexity):  
-  # results = pd.DataFrame(columns=['Template1','Template2'])
   results = pd.DataFrame(columns=['test'])
 
-  # for i in range(1, complexity+1, 5):
-  for i in range(1, complexity+1, 2):
+  for i in range(1, complexity+1, 5):
+  # for i in range(1, complexity+1, 2):
     print("For complexity ", i)
     record = GetSMC(i, results)
     # print(record)
@@ -88,7 +78,7 @@ def UpToComplexity(complexity):
   results.index += 1 
   return results
 
-results = UpToComplexity(100)
+results = UpToComplexity(200)
 print(results)
 # results.to_csv("RunningTimesBatch.csv")
 
