@@ -28,7 +28,7 @@ let procedure (formula: Ast.formula): Ast.formula =
       smc
 
 let main =  
-  (* perform_tests 1 15000 500  *)
+  (* perform_tests "/Users/jasminexuereb/Desktop/phd/OptimalMonitor/Tool/src/results.csv" 1 15000 500  *)
 
   let input = 
     if Array.length Sys.argv > 1
@@ -60,8 +60,6 @@ let main =
       exit 0
     )
     else
-    let size = tree_size formula in 
-    (* print_endline("tree size is " ^ string_of_int(size)); *)
     let smc = procedure formula 
       in print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n");  
       smc
