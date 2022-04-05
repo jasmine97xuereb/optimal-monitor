@@ -1,4 +1,4 @@
-open Array
+(* open Array
 open RandomFormula
 open PrettyPrint
 open EnvFunctions
@@ -71,4 +71,4 @@ let process_tests =
   let strlresults = Array.mapi (fun size ->  fun time -> Array.of_list [string_of_int size;string_of_float time]) results in
   let csvtresults = Csv.of_array strlresults in
   Csv.save "/Users/jasminexuereb/Desktop/phd/OptimalMonitor/Tool/src/processed_results.csv" csvtresults;
-  
+   *)

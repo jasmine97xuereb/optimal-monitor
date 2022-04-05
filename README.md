@@ -1,6 +1,6 @@
 # A Synthesis Tool for Optimal Monitors in a Branching-Time Setting
 
-A tool using OCaml that generates the strongest monitorable consequence from an arbitrary rechHML formula.
+A prototype tool using OCaml that generates the strongest monitorable consequence from arbitrary branching-time rechHML formula.
 
 ## Getting Started
 
@@ -69,8 +69,26 @@ oasis setup -setup-update dynamic
 ```
 #### To build the project
 ```
+cd Tool
 make
 ```
 
+## Assumptions
+This tool relies on a number of assumptions, which are listed below.
+\* All recursion variables are bound by least or greatest fixed points (i.e., formulas are closed).
+\* In case of syntax errors, no attempt at solving them is made. Instead, a parsing error is returned. 
+\* The formula is already in disjunctive form. If not, the tool still attempts to generate the strongest monitorable consequence but with no guarantee that the final result will be its best monitorable approximation.  
 
+## Running the tool
+There are two ways how this tool can be employed to generate the strongest monitorable consequence of a branching-time recHML property. 
+
+### Option 1: Passing the formula as a command line argument 
+```
+./main.native "([c]ff & [m]ff) | ([m]ff & <c>(max X.([c]ff & [m]ff) | (<c>X & [c]X & [m]ff)) & [c](max X.([c]ff & [m]ff) | (<c>X & [c]X & [m]ff)))"
+```
+
+### Option 2: Specifying the location of a file containing the formula 
+```
+./main.native
+```
 <!-- ## Authors

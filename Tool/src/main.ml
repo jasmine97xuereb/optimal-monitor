@@ -5,7 +5,6 @@ open EnvFunctions
 open EnvResources 
 open Test
 
-
 (* Read the contents of a file and return a string *)
 let read_lines name : string =
   let ic = 
@@ -26,7 +25,6 @@ let parse_formula s = Parser.rechml Lexer.token (from_string s)
 let procedure (formula: Ast.formula): Ast.formula = 
   let formula = populate_map formula VarSet.empty in
     let smc = get_strongest_mon_cons formula in 
-      (* print_endline("The strongest monitorable consequence is: " ^ (formula_to_string smc) ^ "\n"); *)
       smc
 
 let main =  
@@ -63,11 +61,11 @@ let main =
     )
     else
     let size = tree_size formula in 
-    print_endline("tree size is " ^ string_of_int(size));
+    (* print_endline("tree size is " ^ string_of_int(size)); *)
     let smc = procedure formula 
-      (* in smc *)
       in print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n");  
-      generate_property_detecter smc
+      smc
+      (* generate_property_detecter smc *)
 
     
 
