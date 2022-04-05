@@ -73,6 +73,11 @@ cd Tool
 make
 ```
 
+## The Tool 
+
+A short demo video for this tool can be found on [YouTube](https://youtu.be/XI6GoG4MaNk). 
+<!-- We highly encourage you to consult the paper that sets all the theoretical foundations for this tool.   -->
+
 ## Assumptions
 This tool relies on a number of assumptions, which are listed below.
 * All recursion variables are bound by least or greatest fixed points (i.e., formulas are closed).
