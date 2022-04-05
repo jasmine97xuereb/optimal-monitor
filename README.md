@@ -82,13 +82,15 @@ This tool relies on a number of assumptions, which are listed below.
 ## Running the tool
 There are two ways how this tool can be employed to generate the strongest monitorable consequence of a branching-time recHML property. 
 
-### Option 1: Passing the formula as a command line argument 
+#### Option 1: Passing the formula as a command line argument 
 ```
 ./main.native "([c]ff & [m]ff) | ([m]ff & <c>(max X.([c]ff & [m]ff) | (<c>X & [c]X & [m]ff)) & [c](max X.([c]ff & [m]ff) | (<c>X & [c]X & [m]ff)))"
 ```
 
-### Option 2: Specifying the location of a file containing the formula 
+#### Option 2: Specifying the location of a file containing the formula 
 ```
 ./main.native
 ```
+When prompted, enter the full file path.
+
 <!-- ## Authors
