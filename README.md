@@ -75,9 +75,9 @@ make
 
 ## Assumptions
 This tool relies on a number of assumptions, which are listed below.
-\* All recursion variables are bound by least or greatest fixed points (i.e., formulas are closed).
-\* In case of syntax errors, no attempt at solving them is made. Instead, a parsing error is returned. 
-\* The formula is already in disjunctive form. If not, the tool still attempts to generate the strongest monitorable consequence but with no guarantee that the final result will be its best monitorable approximation.  
+* All recursion variables are bound by least or greatest fixed points (i.e., formulas are closed).
+* In case of syntax errors, no attempt at solving them is made. Instead, a parsing error is returned. 
+* The formula is already in disjunctive form. If not, the tool still attempts to generate the strongest monitorable consequence but with no guarantee that the final result will be its best monitorable approximation.  
 
 ## Running the tool
 There are two ways how this tool can be employed to generate the strongest monitorable consequence of a branching-time recHML property. 
