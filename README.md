@@ -1,6 +1,6 @@
 # A Synthesis Tool for Optimal Monitors in a Branching-Time Setting
 
-A prototype tool using OCaml that generates the strongest monitorable consequence from arbitrary branching-time rechHML formula.
+A prototype tool using OCaml that generates the strongest monitorable consequence from arbitrary branching-time rechHML formulas.
 
 ## Getting Started
 
