@@ -32,7 +32,6 @@ def RunToolOnce(mon):
     time=np.nan
   return time
 
-
 # run the tool a number of times
 # store each running time in a dataframe
 # clean the dataframe and return the mean running time
@@ -52,35 +51,24 @@ def GetData(p):
 # get the list of generated properties
 # specify the required number of repetitions by passing this value as a parameter
 # run generate.py
-# get the tool's mean running time for each property in the list
+# get the tool's mean running time 
 # return a record with the mean running time for complexity 
 
-# def GetSMC(complexity, results):
-#   time_record = []  
-
-#   output = subprocess.check_output("python generate.py "+str(complexity), env=my_env, stderr=subprocess.STDOUT, shell=True)
-#   output = output.splitlines()
-#   p_lst = [e.decode('ascii') for e in output]
-
-#   for p in p_lst:
-#     i = p_lst.index(p) #column of the current property template in results
-#     time_record.append(float(GetData(p)))
-#   return time_record
-
-def GetSMC(complexity, results):
+def GetSMC(complexity, results, p):
   time_record = []  
-  output = generate.p1(complexity)  
+  if p == 1: 
+    output = generate.p1(complexity)
+  else:  
+    output = generate.p2(complexity) 
   time_record.append(float(GetData(output)))
   return time_record
 
-def UpToComplexity(complexity):  
+def UpToComplexity(complexity, p):  
   results = pd.DataFrame(columns=['Time'])
 
   for i in range(1, complexity+1, 5):
-  # for i in range(1, complexity+1, 2):
     print("For complexity ", i)
-    record = GetSMC(i, results)
-    # print(record)
+    record = GetSMC(i, results, p)
     results.loc[len(results)] = record
   results.index += 1 
   return results
@@ -93,13 +81,13 @@ def RandomTest():
 
 # PARAMETRISED TESTS - P1
 # Note that presently, the formula size is hardcoded
-results = UpToComplexity(200)
+results = UpToComplexity(200, 1)
 results.insert(0, "Size", [130,780,1430,2080,2730,3380,4030,4680,5330,5980,6630,7280,7930,8580,9230,9880], True)
 # print(results)
 results.to_csv("results_parametrised_p1.csv")
 
 # PARAMETRISED TESTS - P2
-results = UpToComplexity(200)
+results = UpToComplexity(200, 2)
 results.insert(0, "Size", [9,65,169,321,521,769,1065,1409,1801,2241,2729,3265,3849,4481,5161,5889,6665,7489,8361,9281], True)
 # print(results)
 results.to_csv("results_parametrised_p2.csv")

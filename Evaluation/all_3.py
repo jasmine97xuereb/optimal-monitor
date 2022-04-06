@@ -4,7 +4,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 
-# from .. import plot_2
 import plot_2
 
 SHIFT_VAL = 0.25
@@ -23,7 +22,6 @@ def _draw_plot(fig, df1, df2, df3):
 def _shift_x_labels(fig, ax, fact):
 
     # Create offset transform by 5 points in x direction
-    # dx = 9/72.; dy = 0/72.
     dx = fact/72.; dy = 0/72.
     offset = transforms.ScaledTranslation(dx, dy, fig.dpi_scale_trans)
 
@@ -41,13 +39,11 @@ def _make_fig_latex():
     # Configure figure style, size. It will have no title.
     plot_2.set_plot_style(plt)
     fig = plt.figure()
-    # plot_2.set_fig_style(fig, 4, 1.3)
     plot_2.set_fig_style(fig, 4.5, 1.3)
 
     # Size without top no legend.
     fig.subplots_adjust(
         left=0.1, bottom=0.22, right=0.95, top=0.89, wspace=0.3, hspace=0.38
-        # left=0.1, bottom=0.11, right=0.97, top=0.94, wspace=0.2, hspace=0.38
     )
 
     gs = fig.add_gridspec(1, 2)
@@ -60,19 +56,11 @@ def _make_fig_latex():
     # ax.set_yscale('symlog')
     ax.axis([0, 10000, 0, 1500])
     ax.set_xticks(np.arange(0, 10001, 2000))
-    # ax.axis([0, 15000, 0, 6000])
-    # ax.set_xticks(np.arange(0, 15001, 2500))
-    # ax.set_xticks(np.arange(0, 15001, 5000))
-    # ax.set_yticks(np.arange(0, 6001, 1500))
     ax.set_yticks(np.arange(0, 1501, 500))
     ax.set(xlabel='Size ($n$)', ylabel='Time (s)')
 
     ax_1.set_title(r'Random Formulae')
-    # ax.set_yscale('symlog')
     ax_1.axis([0, 10000, 0, 0.06])
-    # l = np.insert((np.arange(0.02, 0.061, 0.02)), 0, np.zeros((1,), dtype=int)[0], axis=0)
-    # l = [0, 0.02, 0.04, 0.06]
-    # print(l)
     ax_1.set_yticks([0, 0.02, 0.04, 0.06], ['0', '0.02', '0.04', '0.06'])
     ax_1.set(xlabel='Size ($n$)')
 
@@ -94,11 +82,8 @@ def _save_fig(fig, data_dir, file, ext):
     :return: The figure file name.
     """
 
-    # Retrieve figure title (hack) to use as the name of the file where plots
-    # are saved. Figure is saved to PDF.
-    # file = os.path.join(data_dir, ensure_pdf_ext(fig._suptitle.get_text()))
+    # Retrieve figure title (hack) to use as the name of the file where plots are saved. Figure is saved to PDF.
     file = os.path.join(data_dir, file + '.' + ext)
-    # fig.savefig(file, dpi=fig.dpi, bbox_inches='tight')
     plt.savefig(file)
 
     return file
