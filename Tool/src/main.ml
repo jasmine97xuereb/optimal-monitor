@@ -27,47 +27,68 @@ let procedure (formula: Ast.formula): Ast.formula =
     let smc = get_strongest_mon_cons formula in 
       smc
 
-let main =  
-  (* perform_tests "/Users/jasminexuereb/Desktop/phd/OptimalMonitor/Tool/src/results.csv" 1 15000 500  *)
+let check_test (input): unit = 
+  if (Array.length input == 2) && (input.(1) = "test")
+  then (
+    let file_dir = (Sys.getcwd()) ^ "/../Evaluation/results_random.csv"
+    in perform_tests file_dir 1 15000 500; 
+    process_tests file_dir;
+    exit 0
+  )
+  else () 
+  
+let check_save (input): bool = 
+  if (Array.length input == 2) && (input.(1) = "save")
+  then true
+  else 
+    if (Array.length input == 3) && (input.(2) = "save")
+    then true
+    else false
 
-  let input = 
-    if Array.length Sys.argv > 1
+let read_formula (input): string = 
+  if Array.length input == 2
+  then (
+    if input.(1) = "save"
     then (
-      (Sys.argv.(1) ^ "\n")
-    ) 
-    else (
       print_endline("\nPlease enter the full file path.");
       let file_path = Scanf.scanf "%s" (fun x -> x) 
       in let content = read_lines file_path
       in print_endline("\nThe formula read is: \n" ^ content);
       content ^ "\n"
     )
-    in
-    let formula =
-      try parse_formula input
-      with _ ->
-        print_endline("There seems to be some problem parsing your formula!");
-        exit 0 
-    
-    in 
-    print_endline("\nThe AST is: ");
-    pretty_print_ast formula;
-    print_endline("\n");
+    else (input.(1) ^ "\n")
+  ) 
+  else 
+    if Array.length input == 3
+    then (input.(1) ^ "\n") 
+  else ""
+
+let main =  
+
+  let input = Sys.argv in 
+  check_test input;
+  let save = check_save input in
+  let read = read_formula input in
+  let formula =
+    try parse_formula read
+    with _ ->
+      print_endline("There seems to be some problem parsing your formula!");
+      exit 0 
   
-    if not (VarSet.is_empty (fv formula VarSet.empty))
-    then (
-      print_endline("The formula is not closed. Aborting.");
-      exit 0
-    )
-    else
-    let smc = procedure formula 
-      in print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n");  
-      smc
-      (* generate_property_detecter smc *)
+  in 
+  print_endline("\nThe AST is: ");
+  pretty_print_ast formula;
+  print_endline("\n");
 
-    
-
-
-
-
-
+  if not (VarSet.is_empty (fv formula VarSet.empty))
+  then (
+    print_endline("The formula is not closed. Aborting.");
+    exit 0
+  )
+  else
+  let smc = procedure formula 
+    in print_endline("The strongest monitorable consequence is " ^ (formula_to_string smc) ^ "\n");  
+    if save 
+    then generate_property_detecter smc
+    else () 
+  
