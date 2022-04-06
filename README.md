@@ -12,8 +12,8 @@ Before following the rest of the instructions, please install the software packa
 
 ### Installing
 
-For Ubuntu/Debian, we recommend using the (APT)[https://ubuntu.com/server/docs/package-management] package manager, which comes pre-bundled.
-For MacOS, we recommend using Homebrew. For installation, follow the guide provided (here)[https://brew.sh].
+For Ubuntu/Debian, we recommend using the [APT](https://ubuntu.com/server/docs/package-management) package manager, which comes pre-bundled.
+For MacOS, we recommend using Homebrew. For installation, follow the guide provided [here](https://brew.sh).
 
 #### Installs curl
 For Ubuntu/Debian, install curl using APT.
