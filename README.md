@@ -5,18 +5,28 @@ A prototype tool using OCaml that generates the strongest monitorable consequenc
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. 
+We assume that users are running Ubuntu/Debian or macOS. 
+For Windows 10, we suggest installing the Windows Subsystem for Linux and following the instructions below.
+ <!-- or alternatively, configure Chocolatey and install the software packages mentioned via choco install. However, our instructions will not detail how detectEr is installed and used on Windows systems. -->
+Before following the rest of the instructions, please install the software package management system available for your particular operating system.
 
 ### Installing
 
-What things you need to install the software and how to install them.
+For Ubuntu/Debian, we recommend using the (APT)[https://ubuntu.com/server/docs/package-management] package manager, which comes pre-bundled.
+For MacOS, we recommend using Homebrew. For installation, follow the guide provided (here)[https://brew.sh].
 
 #### Installs curl
+For Ubuntu/Debian, install curl using APT.
 ```
 sudo apt install curl
 ```
-
+For MacOS, install curl using Homebrew.
+```
+brew install curl
+```
 #### Installs opam 
-Opam is the package manager for OCaml.
+The following command simply downloads and installs the proper pre-compiled binary for Opam based on your architecture.
+Opam is the package manager for OCaml. 
 ```
 sh <(curl -sL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)
 ```
