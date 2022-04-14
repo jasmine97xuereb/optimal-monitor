@@ -15,7 +15,7 @@ Before following the rest of the instructions, please install the software packa
 For Ubuntu/Debian, we recommend using the [APT](https://ubuntu.com/server/docs/package-management) package manager, which comes pre-bundled.
 For MacOS, we recommend using Homebrew. For installation, follow the guide provided [here](https://brew.sh).
 
-#### Installs curl
+<!-- #### Installs curl
 For Ubuntu/Debian, install curl using APT.
 ```
 sudo apt install curl
@@ -23,14 +23,23 @@ sudo apt install curl
 For MacOS, install curl using Homebrew.
 ```
 brew install curl
-```
+``` -->
 #### Installs opam 
-The following command simply downloads and installs the proper pre-compiled binary for Opam based on your architecture.
+<!-- The following command simply downloads and installs the proper pre-compiled binary for Opam based on your architecture. -->
 Opam is the package manager for OCaml. 
-```
+<!-- ```
 sh <(curl -sL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)
+``` -->
+For Ubuntu/Debian, install opam using APT.
+```
+sudo apt install opam
+``` 
+For MacOS, install opam using Homebrew.
+```
+brew install opam
 ```
 #### Sets up environment
+In this step, you will be asked whether you want your zsh configuration to be updated. In these instructions, we opted to choose 'no', and set up the necessary environment variables manually each time.    
 ```
 opam init
 ```
