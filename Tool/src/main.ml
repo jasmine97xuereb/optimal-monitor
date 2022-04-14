@@ -30,6 +30,7 @@ let procedure (formula: Ast.formula): Ast.formula =
 let check_test (input): unit = 
   if (Array.length input == 2) && (input.(1) = "test")
   then (
+    print_endline("Please, be patient... This might take a lot of time...");
     let file_dir = (Sys.getcwd()) ^ "/../Evaluation/results_random.csv"
     in perform_tests file_dir 1 15000 500; 
     process_tests file_dir;
@@ -45,23 +46,29 @@ let check_save (input): bool =
     then true
     else false
 
+let get_path () = 
+  print_endline("\nPlease enter the full file path.");
+  let file_path = Scanf.scanf "%s" (fun x -> x) 
+  in let content = read_lines file_path
+  in print_endline("\nThe formula read is: \n" ^ content);
+  content ^ "\n"
+
 let read_formula (input): string = 
-  if Array.length input == 2
+  if Array.length input == 1
+  then (print_endline("len is 1"); get_path ())
+  else if Array.length input == 2
   then (
     if input.(1) = "save"
-    then (
-      print_endline("\nPlease enter the full file path.");
-      let file_path = Scanf.scanf "%s" (fun x -> x) 
-      in let content = read_lines file_path
-      in print_endline("\nThe formula read is: \n" ^ content);
-      content ^ "\n"
-    )
+    then (print_endline("len is 2 but save");  get_path ())
     else (input.(1) ^ "\n")
   ) 
   else 
     if Array.length input == 3
     then (input.(1) ^ "\n") 
-  else ""
+    else ""
+
+
+
 
 let main =  
 

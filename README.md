@@ -39,7 +39,7 @@ For MacOS, install opam using Homebrew.
 brew install opam
 ```
 #### Sets up environment
-In this step, you will be asked whether you want your zsh configuration to be updated. In these instructions, we opted to choose 'no', and set up the necessary environment variables manually each time.    
+In this step, you will be asked whether you want your zsh configuration to be updated. We suggest denying and setting up the necessary environment variables manually each time (as demonstrated in what follows).     
 ```
 opam init
 ```
