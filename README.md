@@ -44,7 +44,8 @@ opam switch create 4.08.0
 eval $(opam env)
 ```
 #### Installs opam-depext 
-Opam-depext is a tool to query and install external dependencies of opam packages.
+Opam-depext is a tool to query and install external dependencies of opam packages. 
+If you are running opam version 2.1 or later, skip this step as it is installed automatically.   
 ```
 opam install depext
 eval $(opam env)
@@ -68,18 +69,20 @@ opam install oasis
 eval $(opam env)
 ```
 #### Libraries 
-PrintBox is a library used to print nested boxes, lists, arrays, tables in several formats.
+PrintBox is a library used to print nested boxes, lists, arrays, tables in several formats. 
+CSV is a library to read and write CSV files. 
 ```
 opam install printbox printbox-text
+opam install csv
 eval $(opam env)
 ```
 #### To generates a build system, produce the files setup.ml, configure and Makefile, along with some others which can be safely ignored
 ```
+cd Tool
 oasis setup -setup-update dynamic
 ```
 #### To build the project
 ```
-cd Tool
 make
 ```
 
