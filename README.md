@@ -24,7 +24,7 @@ For MacOS, install curl using Homebrew.
 ```
 brew install curl
 ``` -->
-#### Installs opam 
+#### Install opam 
 <!-- The following command simply downloads and installs the proper pre-compiled binary for Opam based on your architecture. -->
 Opam is the package manager for OCaml. 
 <!-- ```
@@ -38,34 +38,34 @@ For MacOS, install opam using Homebrew.
 ```
 brew install opam
 ```
-#### Sets up environment
+#### Set up environment
 In this step, you will be asked whether you want your zsh configuration to be updated. We suggest denying and setting up the necessary environment variables manually each time (as demonstrated in what follows).     
 ```
 opam init
 ```
-#### Sets up necessary environment variables
+#### Set up necessary environment variables
 ```
 eval $(opam env)
 ```
-#### Installs the OCaml compiler version 4.08.0
+#### Install the OCaml compiler version 4.08.0
 ```
 opam switch create 4.08.0
 eval $(opam env)
 ```
-#### Installs opam-depext 
+#### Install opam-depext 
 Opam-depext is a tool to query and install external dependencies of opam packages. 
 If you are running opam version 2.1 or later, skip this step as it is installed automatically.   
 ```
 opam install depext
 eval $(opam env)
 ```
-#### Installs Zarith 
+#### Install Zarith 
 Zarith is a library used to implement arithmetic and logical operations over arbitrary-precision integers.
 ```
 opam install zarith
 eval $(opam env)
 ```
-#### Installs Menhir 
+#### Install Menhir 
 Menhir is a parser generator for OCaml.
 ```
 opam install menhir
@@ -85,7 +85,7 @@ opam install printbox printbox-text
 opam install csv
 eval $(opam env)
 ```
-#### To generates a build system, produce the files setup.ml, configure and Makefile, along with some others which can be safely ignored
+#### To generate a build system, produce the files setup.ml, configure and Makefile, along with some others which can be safely ignored
 ```
 cd Tool
 oasis setup -setup-update dynamic
@@ -93,6 +93,17 @@ oasis setup -setup-update dynamic
 #### To build the project
 ```
 make
+```
+
+### Installing (for Evaluation)
+Here, we guide the reader on how the environment should be set up for performing the evaluation. 
+For Ubuntu/Debian, install python and other required packages using APT. 
+For MacOS, use Homebrew (by replacing *sudo apt-get* by *brew*). 
+```
+sudo apt-get install python3
+sudo apt-get install python3-numpy
+sudo apt-get install python3-pandas
+sudo apt-get install python3-matplotlib
 ```
 
 ## The Tool 
