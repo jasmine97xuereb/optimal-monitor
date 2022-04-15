@@ -100,10 +100,9 @@ Here, we guide the reader on how the environment should be set up for performing
 For Ubuntu/Debian, install python and other required packages using APT. 
 For MacOS, use Homebrew (by replacing *sudo apt-get* by *brew*). 
 ```
-sudo apt-get install python3
-sudo apt-get install python3-numpy
-sudo apt-get install python3-pandas
-sudo apt-get install python3-matplotlib
+sudo apt install python3
+sudo apt install python3-numpy
+sudo apt install python3-pandas
 ```
 
 ## The Tool 
