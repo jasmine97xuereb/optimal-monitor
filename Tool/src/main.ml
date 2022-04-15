@@ -55,11 +55,11 @@ let get_path () =
 
 let read_formula (input): string = 
   if Array.length input == 1
-  then (print_endline("len is 1"); get_path ())
+  then get_path ()
   else if Array.length input == 2
   then (
     if input.(1) = "save"
-    then (print_endline("len is 2 but save");  get_path ())
+    then get_path ()
     else (input.(1) ^ "\n")
   ) 
   else 
