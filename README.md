@@ -10,7 +10,7 @@ For Windows 10, we suggest installing the Windows Subsystem for Linux and follow
  <!-- or alternatively, configure Chocolatey and install the software packages mentioned via choco install. However, our instructions will not detail how detectEr is installed and used on Windows systems. -->
 Before following the rest of the instructions, please install the software package management system available for your particular operating system.
 
-Alternatively, you can skip the installation altogther by using the virtual machine provided [here](https://drive.google.com/file/d/1zFlk3NYAyESFytDaNOy15AeIkSw4v90j/view?usp=sharing).
+Alternatively, you can skip the installation altogther by using the virtual machine provided [here](https://drive.google.com/file/d/1zFlk3NYAyESFytDaNOy15AeIkSw4v90j/view?usp=sharing) (password: optimal-monitor123).
 
 ### Installing
 
